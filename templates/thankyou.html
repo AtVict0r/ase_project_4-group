@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Thank You</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='../static/styles.css') }}"
+    />
+  </head>
+  <body>
+    <nav>
+      <ul>
+        <li><a href="{{ url_for('index') }}">Home</a></li>
+        <li><a href="{{ url_for('about') }}">About</a></li>
+        <li><a href="{{ url_for('recipes') }}">Recipes</a></li>
+      </ul>
+    </nav>
+    <div>
+      <h1>Thank You!</h1>
+      <p>Thank you for submitting your recipe:</p>
+      <h2>Recipe Name: {{ recipe_name }}</h2>
+      <p><strong>Ingredients:</strong></p>
+      <pre>{{ ingredients }}</pre>
+      <p><strong>Steps:</strong></p>
+      <pre>{{ steps }}</pre>
+      <p><a href="{{ url_for('index') }}">Go back to Home</a></p>
+    </div>
+  </body>
+</html>
