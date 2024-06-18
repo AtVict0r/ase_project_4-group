@@ -1,18 +1,18 @@
 import React from 'react';
-import { Container, Row, Col } from 'react-bootstrap';
+import { Container, Row, Col, Navbar } from 'react-bootstrap';
 
-const Footer = () => {
+function Footer() {
   return (
-    <footer className="bg-dark text-light py-3">
+    <Navbar fixed="bottom" bg="light">
       <Container>
         <Row>
-          <Col xs={12} className="text-center">
-            <p>&copy; {new Date().getFullYear()} Alchemy Recipes</p>
+          <Col className="text-center py-3">
+            Alchemic Recipes © 2024
           </Col>
         </Row>
       </Container>
-    </footer>
+    </Navbar>
   );
-};
+}
 
 export default Footer;

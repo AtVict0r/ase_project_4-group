@@ -1,17 +1,30 @@
-import React from 'react';
-import { DropdownButton, DropdownItem } from 'react-bootstrap';
+import React, { useState } from 'react';
+import { Form, Button } from 'react-bootstrap';
 
-const Filter = ({ filter, recipes, handleFilterChange }) => {
+function Filter() {
+  const [filter, setFilter] = useState('');
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    // Handle the filter logic here
+  };
+
   return (
-    <DropdownButton variant="outline-primary" title="Filter">
-      <DropdownItem onClick={() => handleFilterChange('all')}>All</DropdownItem>
-      {recipes.map((recipe) => (
-        <DropdownItem key={recipe.category} onClick={() => handleFilterChange(recipe.category)}>
-          {recipe.category}
-        </DropdownItem>
-      ))}
-    </DropdownButton>
+    <Form onSubmit={handleSubmit}>
+      <Form.Group controlId="filter">
+        <Form.Label>Filter Recipes</Form.Label>
+        <Form.Control
+          type="text"
+          placeholder="Enter filter criteria"
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+        />
+      </Form.Group>
+      <Button variant="primary" type="submit">
+        Apply Filter
+      </Button>
+    </Form>
   );
-};
+}
 
 export default Filter;

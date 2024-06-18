@@ -1,27 +1,22 @@
 import React from 'react';
-import { Card, Image, Badge } from 'react-bootstrap';
+import { Card, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 
-const RecipeCard = ({ recipe }) => {
+function RecipeCard({ recipe }) {
   return (
-    <Card>
-      <Image src={recipe.imageUrl || 'placeholder.jpg'} alt={recipe.name} fluid />
+    <Card style={{ width: '18rem', marginBottom: '15px' }}>
+      <Card.Img variant="top" src={recipe.image} />
       <Card.Body>
-        <Card.Title>
-          <Link to={`/recipes/${recipe.id}`}>{recipe.name}</Link>
-        </Card.Title>
+        <Card.Title>{recipe.title}</Card.Title>
         <Card.Text>
-          {recipe.description && recipe.description.substring(0, 100)}{' '}
-          {recipe.description && recipe.description.length > 100 && '...'}
+          {recipe.description}
         </Card.Text>
-        {recipe.category && (
-          <Badge bg="primary" variant="light">
-            {recipe.category}
-          </Badge>
-        )}
+        <Link to={`/recipe/${recipe.id}`}>
+          <Button variant="primary">View Recipe</Button>
+        </Link>
       </Card.Body>
     </Card>
   );
-};
+}
 
 export default RecipeCard;

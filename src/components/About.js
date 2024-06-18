@@ -4,11 +4,11 @@ import { Container, Row, Col, Image } from 'react-bootstrap';
 const About = () => {
   return (
     <Container className="mt-5">
-      <Row>
-        <Col xs={12} md={6}>
+      <Row className="justify-content-md-center">
+        <Col md="auto">
           <Image src="about.jpg" alt="About Alchemy Recipes" fluid />
         </Col>
-        <Col xs={12} md={6}>
+        <Col md="auto">
           <h1>Welcome to Alchemy Recipes!</h1>
           <p>
             Alchemy Recipes is a website dedicated to the art and science of

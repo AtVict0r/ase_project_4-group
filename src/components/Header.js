@@ -1,22 +1,29 @@
 import React from 'react';
-import { Navbar, Container, Nav } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import { Navbar, Nav } from 'react-bootstrap';
+import { LinkContainer } from 'react-router-bootstrap';
 
-const Header = () => {
+function Header() {
   return (
     <Navbar bg="light" expand="lg">
-      <Container>
-        <Navbar.Brand as={Link} to="/">Alchemy Recipes</Navbar.Brand>
-        <Navbar.Toggle aria-controls="basic-navbar-nav" />
-        <Navbar.Collapse id="basic-navbar-nav">
-          <Nav className="ms-auto">
-            <Nav.Link as={Link} to="/">Home</Nav.Link>
-            <Nav.Link as={Link} to="/about">About</Nav.Link>
-          </Nav>
-        </Navbar.Collapse>
-      </Container>
+      <LinkContainer to="/">
+        <Navbar.Brand>Alchemic Recipes</Navbar.Brand>
+      </LinkContainer>
+      <Navbar.Toggle aria-controls="basic-navbar-nav" />
+      <Navbar.Collapse id="basic-navbar-nav">
+        <Nav className="mr-auto">
+          <LinkContainer to="/about">
+            <Nav.Link>About</Nav.Link>
+          </LinkContainer>
+          <LinkContainer to="/add-recipe">
+            <Nav.Link>Add Recipe</Nav.Link>
+          </LinkContainer>
+          <LinkContainer to="/search">
+            <Nav.Link>Search</Nav.Link>
+          </LinkContainer>
+        </Nav>
+      </Navbar.Collapse>
     </Navbar>
   );
-};
+}
 
 export default Header;
