@@ -1,0 +1,102 @@
+[
+  {
+    "id": 1,
+    "name": "Philosopher's Stone",
+    "description": "A legendary alchemical substance capable of turning base metals into gold.",
+    "price": 999.99,
+    "image": "/images/philosophers-stone.png"
+  },
+  {
+    "id": 2,
+    "name": "Elixir of Life",
+    "description": "Grants the drinker eternal life and youth.",
+    "price": 799.99,
+    "image": "/images/elixir-of-life.png"
+  },
+  {
+    "id": 3,
+    "name": "Aurum Potabile",
+    "description": "Potable gold, believed to restore health and prolong life.",
+    "price": 499.99,
+    "image": "/images/aurum-potabile.png"
+  },
+  {
+    "id": 4,
+    "name": "Alchemist's Fire",
+    "description": "A fierce, bright burning flame used by alchemists for their work.",
+    "price": 249.99,
+    "image": "/images/alchemists-fire.png"
+  },
+  {
+    "id": 5,
+    "name": "Quintessence",
+    "description": "The fifth element, or the essence of a thing in its purest and most concentrated form.",
+    "price": 349.99,
+    "image": "/images/quintessence.png"
+  },
+  {
+    "id": 6,
+    "name": "Celestial Orb",
+    "description": "A mystical orb used for scrying and divination, revealing hidden truths.",
+    "price": 449.99,
+    "image": "/images/celestial-orb.png"
+  },
+  {
+    "id": 7,
+    "name": "Djinni Lamp",
+    "description": "A magical lamp rumored to house a powerful djinn who can grant wishes.",
+    "price": 999.99,
+    "image": "/images/djinn-lamp.png"
+  },
+  {
+    "id": 8,
+    "name": "Mermaid's Tears",
+    "description": "Luminous pearls said to hold the essence of the sea and grant wishes with a mermaid's voice.",
+    "price": 649.99,
+    "image": "/images/mermaid-tears.png"
+  },
+  {
+    "id": 9,
+    "name": "Mandrake Root",
+    "description": "A forked, humanoid root believed to possess magical properties and a powerful scream.",
+    "price": 199.99,
+    "image": "/images/mandrake-root.png"
+  },
+  {
+    "id": 10,
+    "name": "Moonstone Vial",
+    "description": "A vial enchanted to capture moonlight, said to amplify healing and psychic abilities.",
+    "price": 299.99,
+    "image": "/images/moonstone-vial.png"
+  },
+  {
+    "id": 11,
+    "name": "Invisibility Cloak",
+    "description": "A cloak woven with magic, granting the wearer temporary invisibility.",
+    "price": 749.99,
+    "image": "/images/invisibility-cloak.png"
+  },
+  {
+    "id": 12,
+    "name": "Claws of the Chimera",
+    "description": "Razor-sharp claws reputedly taken from a mythical chimera, granting unnatural strength and ferocity.",
+    "price": 499.99,
+    "price_note": "Due to the dangerous nature of this artifact, a waiver must be signed before purchase.",
+    "image": "/images/claws-of-chimera.png"
+  },
+  {
+    "id": 13,
+    "name": "Grimoire of Shadows",
+    "description": "An ancient spellbook containing forbidden knowledge and powerful magic. (Use with caution!)",
+    "price": 1499.99,
+    "price_note": "This item is restricted to experienced mages only. Contact us for purchase verification.",
+    "image": "/images/grimoire-of-shadows.png"
+  },
+  {
+    "id": 14,
+    "name": "Phoenix Feather",
+    "description": "A single feather from a mythical phoenix, said to possess regenerative properties and the ability to bring warmth and light to any situation.",
+    "price": 99.99,
+    "image": "/images/phoenix-feather.png"
+  }
+]

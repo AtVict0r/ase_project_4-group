@@ -1,0 +1,240 @@
+[
+  {
+    "recipeId": 1,
+    "userId": 1,
+    "username": "Alchemist1",
+    "comment": "I tried to turn lead into gold and ended up with a delicious soup instead. 10/10 would transmute again.",
+    "like": true
+  },
+  {
+    "recipeId": 1,
+    "userId": 2,
+    "username": "Alchemist2",
+    "comment": "Who knew alchemy could be so tasty? This recipe is pure gold!",
+    "like": true
+  },
+  {
+    "recipeId": 1,
+    "userId": 5,
+    "username": "PickyEater",
+    "comment": "This recipe is a magical mix of flavors! Even a skeptic like me was impressed.",
+    "like": true
+  },
+  {
+    "recipeId": 2,
+    "userId": 3,
+    "username": "Alchemist3",
+    "comment": "I was skeptical at first, but this recipe really has the 'Midas touch'!",
+    "like": true
+  },
+  {
+    "recipeId": 2,
+    "userId": 4,
+    "username": "Alchemist4",
+    "comment": "This recipe is a real gem. It's like discovering the philosopher's stone of flavor!",
+    "like": true
+  },
+  {
+    "recipeId": 2,
+    "userId": 6,
+    "username": "HomeCookHero",
+    "comment": "This recipe is so easy to follow, even a beginner like me can create a restaurant-worthy dish. Highly recommend!",
+    "like": true
+  },
+  {
+    "recipeId": 3,
+    "userId": 7,
+    "username": "SpiceLover",
+    "comment": "This recipe packs a flavorful punch! Perfect for those who enjoy a little heat.",
+    "like": true
+  },
+  {
+    "recipeId": 3,
+    "userId": 8,
+    "username": "HealthyChef",
+    "comment": "This dish is not only delicious but also surprisingly healthy. A great weeknight meal option!",
+    "like": true
+  },
+  {
+    "recipeId": 4,
+    "userId": 9,
+    "username": "SundayBrunchFan",
+    "comment": "This recipe is perfect for a lazy Sunday morning. Easy to prepare and oh-so-satisfying!",
+    "like": true
+  },
+  {
+    "recipeId": 4,
+    "userId": 10,
+    "username": "LeftoverLover",
+    "comment": "The leftovers taste even better the next day! Perfect for meal prepping.",
+    "like": true
+  },
+  {
+    "recipeId": 5,
+    "userId": 11,
+    "username": "BudgetBytes",
+    "comment": "This recipe is a lifesaver for those on a tight budget. Delicious and affordable!",
+    "like": true
+  },
+  {
+    "recipeId": 5,
+    "userId": 12,
+    "username": "VegetarianDelight",
+    "comment": "A fantastic vegetarian option that even meat lovers will enjoy. Highly recommend!",
+    "like": true
+  },
+  {
+    "recipeId": 5,
+    "userId": 13,
+    "username": "FiveStarChef",
+    "comment": "This recipe deserves a Michelin star! Impressed by the presentation and the complex flavors.",
+    "like": true
+  },
+  {
+    "recipeId": 6,
+    "userId": 14,
+    "username": "GlobalGourmet",
+    "comment": "This recipe took me on a culinary adventure! A unique and delicious dish that I'll definitely make again.",
+    "like": true
+  },
+  {
+    "recipeId": 6,
+    "userId": 15,
+    "username": "PickyEaterPro",
+    "comment": "Even my picky eaters devoured this dish! A crowd-pleaser for sure.",
+    "like": true
+  },
+  {
+    "recipeId": 7,
+    "userId": 16,
+    "username": "SweetTooth",
+    "comment": "This dessert is pure heaven! Perfect for satisfying any sweet craving.",
+    "like": true
+  },
+  {
+    "recipeId": 7,
+    "userId": 17,
+    "username": "GlutenFreeFoodie",
+    "comment": "So happy to find a delicious and easy gluten-free dessert recipe! Thanks for sharing!",
+    "like": true
+  },
+  {
+    "recipeId": 8,
+    "userId": 18,
+    "username": "OnePotWonder",
+    "comment": "Love how this recipe only uses one pot! Makes cleanup a breeze.",
+    "like": true
+  },
+  {
+    "recipeId": 8,
+    "userId": 19,
+    "username": "WeeknightWarrior",
+    "comment": "This is my go-to recipe for busy weeknights. Quick, easy, and always delicious!",
+    "like": true
+  },
+  {
+    "recipeId": 9,
+    "userId": 20,
+    "username": "SlowCookerMaster",
+    "comment": "This recipe is perfect for those days when you want a hot meal without the hassle. Throw everything in the slow cooker and let it work its magic!",
+    "like": true
+  },
+  {
+    "recipeId": 9,
+    "userId": 21,
+    "username": "FlavorFusion",
+    "comment": "The combination of flavors in this recipe is incredible! A truly unique and satisfying dish.",
+    "like": true
+  },
+  {
+    "recipeId": 10,
+    "userId": 23,
+    "username": "HealthyEats",
+    "comment": "This recipe is a guilt-free indulgence. Packed with flavor and nutrients!",
+    "like": true
+  },
+  {
+    "recipeId": 11,
+    "userId": 22,
+    "username": "InternationalChef",
+    "comment": "This recipe transported me straight to the isles! So authentic and delicious.",
+    "like": true
+  },
+  {
+    "recipeId": 10,
+    "userId": 23,
+    "username": "HealthyEats",
+    "comment": "This recipe is a guilt-free indulgence. Packed with flavor and nutrients!",
+    "like": true
+  },
+  {
+    "recipeId": 12,
+    "userId": 26,
+    "username": "GrillMaster",
+    "comment": "This recipe takes grilling to the next level! Perfect for summer cookouts.",
+    "like": true
+  },
+  {
+    "recipeId": 12,
+    "userId": 27,
+    "username": "VegetarianGriller",
+    "comment": "This recipe proves that grilling isn't just for meat lovers! So many delicious vegetarian options to explore.",
+    "like": true
+  },
+  {
+    "recipeId": 13,
+    "userId": 28,
+    "username": "PartyPlanner",
+    "comment": "This recipe was a huge hit at my last party! Everyone loved it.",
+    "like": true
+  },
+  {
+    "recipeId": 13,
+    "userId": 29,
+    "username": "LeftoverArtist",
+    "comment": "This recipe is even better the next day! Perfect for creating leftover masterpieces.",
+    "like": true
+  },
+  {
+    "recipeId": 3,
+    "userId": 30,
+    "username": "ComfortFoodKing",
+    "comment": "This recipe brings back so many childhood memories! The perfect comfort food dish.",
+    "like": true
+  },
+  {
+    "recipeId": 8,
+    "userId": 31,
+    "username": "CollegeCuisine",
+    "comment": "This recipe is a lifesaver for college students! Affordable, easy, and perfect for dorm room cooking.",
+    "like": true
+  },
+  {
+    "recipeId": 10,
+    "userId": 32,
+    "username": "SpiceItUp",
+    "comment": "I love to add a little kick to my recipes! This one was delicious, but I cranked up the heat a notch. Perfect for spice lovers!",
+    "like": true
+  },
+  {
+    "recipeId": 1,
+    "userId": 33,
+    "username": "DinnerPartyPro",
+    "comment": "This recipe is a guaranteed crowd-pleaser! Perfect for a fancy dinner party or a casual get-together.",
+    "like": true
+  },
+  {
+    "recipeId": 5,
+    "userId": 34,
+    "username": "VeganVibes",
+    "comment": "This recipe is a fantastic option for vegans and vegetarians alike! So flavorful and satisfying.",
+    "like": true
+  },
+  {
+    "recipeId": 9,
+    "userId": "user35",
+    "username": "FamilyFavorite",
+    "comment": "This recipe is a winner in my household! The whole family devours it every time I make it.",
+    "like": true
+  }
+]
