@@ -20,7 +20,7 @@ const Review = ({ reviews, onAddReview, user, onShowLogin }) => {
       comment: reviewText,
       like: like
     };
-    onAddReview(reviewText);
+    onAddReview(review);
     setReviewText("");
     setLike(null);
     setError("");

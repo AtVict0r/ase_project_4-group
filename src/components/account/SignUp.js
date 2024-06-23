@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 
-const SignUp = ({ show, onShowLogin, handleClose, setUser }) => {
+const SignUp = ({ api, show, onShowLogin, handleClose, setUser }) => {
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -35,9 +35,31 @@ const SignUp = ({ show, onShowLogin, handleClose, setUser }) => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
+      try {
+        // Make a POST request to the API
+        const response = await fetch(`${api}/signup`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username: formData.username,
+            email: formData.email,
+            password: formData.password,
+          }),
+        });
+  
+        if (!response.ok) {
+          throw new Error("API call failed");
+        }
+      } catch (error) {
+        // Log the error message to the console
+        console.error("API call failed:", error);
+      }
+
       console.log("Form data submitted:", formData);
       localStorage.setItem("user", JSON.stringify(formData));
       setUser(formData); 

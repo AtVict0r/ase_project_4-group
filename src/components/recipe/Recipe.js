@@ -5,7 +5,7 @@ import AddRecipe from "./AddRecipe";
 import EditRecipe from "./EditRecipe";
 import { Container, Row, Col, Button } from "react-bootstrap";
 
-const Recipe = ({ user, recipes, reviews, shopItems, onShowLogin, onAddToCart }) => {
+const Recipe = ({ api, user, recipes, reviews, shopItems, onShowLogin, onAddToCart }) => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -37,10 +37,24 @@ const Recipe = ({ user, recipes, reviews, shopItems, onShowLogin, onAddToCart })
     setShowDetailsModal(true);
   };
 
-  const handleAddRecipe = (newRecipe) => {
-    // Logic to add the new recipe to the list
+  const handleAddRecipe = async (newRecipe) => {
     console.log("New recipe added:", newRecipe);
-    // Update the state or perform API call to save the new recipe
+
+    try {
+      const response = await fetch(`${api}/new_recipe`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newRecipe),
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Failed to create the recipe:', error);
+    }
   };
 
   const handleEdit = (recipe) => {
@@ -49,17 +63,43 @@ const Recipe = ({ user, recipes, reviews, shopItems, onShowLogin, onAddToCart })
     setShowEditModal(true);
   };
 
-  const handleUpdateRecipe = (updatedRecipe) => {
-    // Logic to update the recipe in the list
+  const handleUpdateRecipe = async (updatedRecipe) => {
     console.log("Updated recipe:", updatedRecipe);
-    // Close the edit modal
+    
+    try {
+      const response = await fetch(`${api}/recipes/edit/${updatedRecipe.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedRecipe),
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Failed to update the recipe:', error);
+    }
+
     setShowEditModal(false);
     setShowDetailsModal(true);
   };
 
-  const handleDelete = (recipeId) => {
-    // Logic to delete the recipe from the list
+  const handleDelete = async (recipeId) => {
     console.log("Deleted recipe with id:", recipeId);
+
+    try {
+      const response = await fetch(`${api}/delete_recipe/${recipeId}`, {
+        method: 'DELETE',
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }  
+    } catch (error) {
+      console.error('Failed to delete the recipe:', error);
+    }
   };
 
   return (
@@ -99,6 +139,7 @@ const Recipe = ({ user, recipes, reviews, shopItems, onShowLogin, onAddToCart })
       {selectedRecipe &&
         (showDetailsModal ? (
           <RecipeDetail
+            api={api}
             user={user}
             recipe={selectedRecipe}
             reviews={reviews}

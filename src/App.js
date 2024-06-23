@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "./components/Header";
 import SignUp from "./components/account/SignUp";
 import Login from "./components/account/Login";
@@ -19,13 +19,73 @@ const API_ENDPOINT = "http://127.0.0.1:8000";
 
 export default function App() {
   const [user, setUser] = useState(JSON.parse(localStorage.getItem("user")));
-  const [recipes, setRecipes] = useState(recipesJson);
-  const [shopItems, setShopItems] = useState(shopItemsJson);
-  const [reviews, setReviews] = useState(reviewsJson);
+  const [recipes, setRecipes] = useState([]);
+  const [shopItems, setShopItems] = useState([]);
+  const [reviews, setReviews] = useState([]);
   const [cartItems, setCartItems] = useState([]);
+  const [orders, setOrders] = useState([]);
   const [showSignUp, setShowSignUp] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [showContact, setShowContact] = useState(false);
+
+  useEffect(() => {
+    const fetchRecipes = async () => {
+      try {
+        const response = await fetch(`${API_ENDPOINT}/get_all_recipes`);
+  
+        if (!response.ok) {
+          throw new Error("API call failed");
+        }
+  
+        const data = await response.json();
+        setRecipes(data);
+      } catch (error) {
+        console.error("API call failed:", error);
+        setRecipes(recipesJson);
+      }
+    };
+
+    const fetchShopItems = async () => {
+      try {
+        const response = await fetch(`${API_ENDPOINT}/shop-items`);
+        if (!response.ok) throw new Error("API call failed");
+        const data = await response.json();
+        setShopItems(data);
+      } catch (error) {
+        console.error("API call failed:", error);
+        setShopItems(shopItemsJson);
+      }
+    };
+
+    const fetchReviews = async () => {
+      try {
+        const response = await fetch(`${API_ENDPOINT}/reviews/all`);
+        if (!response.ok) throw new Error("API call failed");
+        const data = await response.json();
+        setReviews(data);
+      } catch (error) {
+        console.error("API call failed:", error);
+        setReviews(reviewsJson);
+      }
+    };
+
+    const fetchOrders = async () => {
+      try {
+        const response = await fetch(`${API_ENDPOINT}/orders/user_id=${user.id}`);
+        if (!response.ok) throw new Error("API call failed");
+        const data = await response.json();
+        setOrders(data);
+      } catch (error) {
+        console.error("API call failed:", error);
+      }
+    };
+
+    fetchRecipes();
+    fetchReviews();
+    fetchShopItems();
+
+    if (user) { fetchOrders(); }
+  }, []);
 
   const addToCart = (item) => {
     const existingItem = cartItems.find((cartItem) => cartItem.id === item.id);
@@ -45,7 +105,7 @@ export default function App() {
         )
       );
     } else {
-      setCartItems((prevItems) => [...prevItems, { ...item, quantity: 1 }]);
+      setCartItems((prevItems) => [...prevItems, { ...item, quantity: 1, userId: user.id }]);
     }
   
     console.log("Added to cart:", item);
@@ -65,7 +125,23 @@ export default function App() {
     );
   };
 
-  const onCheckout = () => {
+  const onCheckout = async () => {
+    try {
+      const response = await fetch(`${API_ENDPOINT}/orders`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(cartItems),
+      });
+  
+      if (!response.ok) {
+        throw new Error("API call failed");
+      }
+    } catch (error) {
+      console.error("API call failed:", error);
+    }
+
     alert("Thank you for your purchase!");
     console.log("Checkout:", cartItems);
     setCartItems([]);

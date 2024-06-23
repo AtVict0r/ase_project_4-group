@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { Modal, Button, Form, Alert } from "react-bootstrap";
+import { Modal, Button, Form } from "react-bootstrap";
 import usersJson from "./users.json"
 
-const Login = ({ show, onShowSignUp, handleClose, setUser }) => {
+const Login = ({ api, show, onShowSignUp, handleClose, setUser }) => {
+  const [savedUser, setSavedUser] = useState(null);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -25,14 +26,34 @@ const Login = ({ show, onShowSignUp, handleClose, setUser }) => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (validateForm()) {
-      // Handle the login logic here
-      const savedUser = usersJson.find(
+      try {
+      // Make a POST request to the API
+      const response = await fetch(`${api}/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error("API call failed");
+      }
+
+      const data = await response.json();
+      setUser(data);
+      setSavedUser(data);
+      localStorage.setItem("user", JSON.stringify(data));
+    } catch (error) {
+      console.error("API call failed:", error);
+      setSavedUser(usersJson.find(
         (user) =>
           user.email === formData.email && user.password === formData.password
-      );
+      ));
       if (
         savedUser &&
         savedUser.email === formData.email &&
@@ -46,6 +67,7 @@ const Login = ({ show, onShowSignUp, handleClose, setUser }) => {
         alert("Invalid email or password");
       }
     }
+  }
   };
 
   return (

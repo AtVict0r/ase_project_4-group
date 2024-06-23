@@ -8,8 +8,24 @@ const RecipeDetail = ({ recipe, reviews, show, shopItems, onHide, user, onShowLo
     (review) => review.recipeId === recipe.id
   );
 
-  const addReview = (reviewText) => {
-    console.log("Adding review:", reviewText);
+  const addReview = async (review) => {
+    console.log("Adding review:", review);
+
+    try {
+      const response = await fetch(`${api}/reviews/create`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(review),
+      });
+  
+      if (!response.ok) {
+        throw new Error("API call failed");
+      } 
+    } catch (error) {
+      console.error("API call failed:", error);
+    } 
   };
 
   const handleMouseEnter = (e) => {
