@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Form, Button, Alert, Modal } from "react-bootstrap";
 
-const Contact = ({ show, handleClose }) => {
+const Contact = ({ user, show, handleClose }) => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -9,6 +9,16 @@ const Contact = ({ show, handleClose }) => {
   });
   const [errors, setErrors] = useState({});
   const [showAlert, setShowAlert] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setFormData((prevState) => ({
+        ...prevState,
+        name: user.username,
+        email: user.email,
+      }));
+    }
+  }, [user]);
 
   const validateForm = () => {
     let tempErrors = {};
@@ -34,15 +44,14 @@ const Contact = ({ show, handleClose }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (validateForm()) {
-      // Here you would handle the form submission, e.g., sending data to a server
+      const mailtoLink = `mailto:admin@alchemicrecipes.org?subject=Contact Form Submission from ${formData.name}&body=Reply-To: ${formData.email}%0D%0A%0D%0AMessage: ${formData.message}`;
+      window.open(mailtoLink, '_blank');
       setShowAlert(true);
-      // Reset form fields
       setFormData({
         name: "",
         email: "",
         message: "",
       });
-      // Close the form modal after a delay
       setTimeout(() => {
         setShowAlert(false);
         handleClose();

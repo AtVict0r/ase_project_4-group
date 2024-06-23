@@ -1,10 +1,14 @@
 import React, { useState } from "react";
 import RecipeCard from "./RecipeCard";
 import RecipeDetail from "./RecipeDetail";
+import AddRecipe from "./AddRecipe";
+import EditRecipe from "./EditRecipe";
 import { Container, Row, Col, Button } from "react-bootstrap";
-import recipes from "./recipes.json"; // assuming the recipes.json file is in the same directory
 
-const Recipe = ({ onShowLogin, onAddToCart }) => {
+const Recipe = ({ user, recipes, reviews, shopItems, onShowLogin, onAddToCart }) => {
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const recipesPerPage = 6;
@@ -28,23 +32,58 @@ const Recipe = ({ onShowLogin, onAddToCart }) => {
     });
   };
 
-  // show recipe details
   const showDetails = (recipe) => {
     setSelectedRecipe(recipe);
+    setShowDetailsModal(true);
   };
 
-  // hide recipe details
-  const hideDetails = () => {
-    setSelectedRecipe(null);
+  const handleAddRecipe = (newRecipe) => {
+    // Logic to add the new recipe to the list
+    console.log("New recipe added:", newRecipe);
+    // Update the state or perform API call to save the new recipe
+  };
+
+  const handleEdit = (recipe) => {
+    setShowDetailsModal(false);
+    setSelectedRecipe(recipe);
+    setShowEditModal(true);
+  };
+
+  const handleUpdateRecipe = (updatedRecipe) => {
+    // Logic to update the recipe in the list
+    console.log("Updated recipe:", updatedRecipe);
+    // Close the edit modal
+    setShowEditModal(false);
+    setShowDetailsModal(true);
+  };
+
+  const handleDelete = (recipeId) => {
+    // Logic to delete the recipe from the list
+    console.log("Deleted recipe with id:", recipeId);
   };
 
   return (
     <Container id="recipes">
       <h2 className="text-center my-4">Alchemy Recipes</h2>
+      <Col className="d-flex justify-content-start my-3">
+        <Button variant="secondary" onClick={() => setShowAddModal(true)}>
+          Add Recipe
+        </Button>
+      </Col>
+      <AddRecipe
+        show={showAddModal}
+        handleClose={() => setShowAddModal(false)}
+        handleAddRecipe={handleAddRecipe}
+      />
       <Row>
         {currentRecipes.map((recipe, index) => (
-          <Col md={4} key={index}>
-            <RecipeCard recipe={recipe} onShowDetails={showDetails} />
+          <Col xs={12} md={6} lg={4} className="mb-3 d-flex justify-content-center" key={recipe.id}>
+            <RecipeCard
+              recipe={recipe}
+              onShowDetails={showDetails}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
           </Col>
         ))}
       </Row>
@@ -56,15 +95,34 @@ const Recipe = ({ onShowLogin, onAddToCart }) => {
           <Button onClick={() => paginate(1)}>Next</Button>
         </Col>
       </Row>
-      {selectedRecipe && (
-        <RecipeDetail
-          recipe={selectedRecipe}
-          show={!!selectedRecipe}
-          onHide={hideDetails}
-          onShowLogin={onShowLogin}
-          onAddToCart={onAddToCart}
-        />
-      )}
+      {selectedRecipe &&
+        (showDetailsModal ? (
+          <RecipeDetail
+            user={user}
+            recipe={selectedRecipe}
+            reviews={reviews}
+            show={showDetailsModal}
+            shopItems={shopItems}
+            onHide={() => {
+              setSelectedRecipe(null);
+              setShowDetailsModal(false);
+            }}
+            onShowLogin={onShowLogin}
+            onAddToCart={onAddToCart}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        ) : showEditModal ? (
+          <EditRecipe
+            show={showEditModal}
+            onHide={() => {
+              setShowEditModal(false);
+              setShowDetailsModal(true);
+            }}
+            recipe={selectedRecipe}
+            handleUpdateRecipe={handleUpdateRecipe}
+          />
+        ) : null)}
     </Container>
   );
 };

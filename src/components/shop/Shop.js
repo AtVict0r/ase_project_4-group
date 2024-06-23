@@ -1,24 +1,21 @@
 import React, { useState } from "react";
 import ShopItemCard from "./ShopItemCard";
-import ItemInfo from "./ItemInfo"; // This component needs to be created
+import ItemInfo from "./ItemInfo"; 
 import { Container, Row, Col, Button } from "react-bootstrap";
-import shopItems from "./shopItems.json"; // assuming the shopItems.json file is in the same directory
 
-const Shop = () => {
+const Shop = ({ shopItems, onAddToCart }) => {
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [selectedItem, setSelectedItem] = useState(null);
   const itemsPerPage = 6;
 
-  // calculate the total number of pages
   const totalPages = Math.ceil(shopItems.length / itemsPerPage);
 
-  // get current items
   const currentItems = shopItems.slice(
     currentPage * itemsPerPage,
     (currentPage + 1) * itemsPerPage
   );
 
-  // change page
   const paginate = (direction) => {
     setCurrentPage((prevPage) => {
       let nextPage = prevPage + direction;
@@ -28,10 +25,9 @@ const Shop = () => {
     });
   };
 
-  // handle add to cart
-  const addToCart = (item) => {
+  const showDetails = (item) => {
     setSelectedItem(item);
-    // Here you would normally handle adding the item to the cart
+    setShowDetailsModal(true);
   };
 
   return (
@@ -39,8 +35,8 @@ const Shop = () => {
       <h2 className="text-center my-4">Alchemy Shop</h2>
       <Row>
         {currentItems.map((item, index) => (
-          <Col md={4} key={index}>
-            <ShopItemCard item={item} onAddToCart={addToCart} />
+          <Col xs={12} md={6} lg={4} className="mb-3 d-flex justify-content-center" key={index}>
+            <ShopItemCard item={item} onShowDetails={showDetails} onAddToCart={onAddToCart} />
           </Col>
         ))}
       </Row>
@@ -52,8 +48,11 @@ const Shop = () => {
           <Button onClick={() => paginate(1)}>Next</Button>
         </Col>
       </Row>
-      {selectedItem && (
-        <ItemInfo item={selectedItem} onHide={onShowItemDetail} />
+      {selectedItem && showDetailsModal && (
+        <ItemInfo item={selectedItem} show={showDetailsModal} onHide={() => {
+          setSelectedItem(null);
+          setShowDetailsModal(false);
+        }} onAddToCart={onAddToCart} />
       )}
     </Container>
   );

@@ -6,6 +6,7 @@ const SignUp = ({ show, onShowLogin, handleClose, setUser }) => {
     username: "",
     email: "",
     password: "",
+    confirmPassword: "",
   });
   const [errors, setErrors] = useState({});
 
@@ -14,7 +15,10 @@ const SignUp = ({ show, onShowLogin, handleClose, setUser }) => {
     tempErrors.username = formData.username ? "" : "Username is required.";
     tempErrors.email = formData.email ? "" : "Email is required.";
     tempErrors.password = formData.password ? "" : "Password is required.";
-    // Add more validation rules if needed
+    tempErrors.confirmPassword = formData.confirmPassword ? "" : "Confirm Password is required."; 
+    if (formData.password && formData.confirmPassword && formData.password !== formData.confirmPassword) {
+      tempErrors.confirmPassword = "Passwords do not match."; 
+    }
     setErrors(tempErrors);
     return Object.values(tempErrors).every((x) => x === "");
   };
@@ -25,7 +29,6 @@ const SignUp = ({ show, onShowLogin, handleClose, setUser }) => {
       ...prevState,
       [name]: value,
     }));
-    // Clear errors
     setErrors((prevErrors) => ({
       ...prevErrors,
       [name]: "",
@@ -35,11 +38,10 @@ const SignUp = ({ show, onShowLogin, handleClose, setUser }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (validateForm()) {
-      // Here you would integrate the signup logic
       console.log("Form data submitted:", formData);
       localStorage.setItem("user", JSON.stringify(formData));
-      setUser(formData); // Update the user state in the parent component
-      handleClose(); // Close the modal after successful signup
+      setUser(formData); 
+      handleClose(); 
     }
   };
 
@@ -94,7 +96,20 @@ const SignUp = ({ show, onShowLogin, handleClose, setUser }) => {
               {errors.password}
             </Form.Control.Feedback>
           </Form.Group>
-
+          <Form.Group className="mb-3" controlId="formBasicConfirmPassword">
+            <Form.Label>Confirm Password</Form.Label>
+            <Form.Control
+              type="password"
+              placeholder="Confirm Password"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              isInvalid={!!errors.confirmPassword}
+            />
+            <Form.Control.Feedback type="invalid">
+              {errors.confirmPassword}
+            </Form.Control.Feedback>
+          </Form.Group>
           <Button variant="primary" type="submit">
             Sign Up
           </Button>

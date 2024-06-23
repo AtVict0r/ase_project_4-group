@@ -1,4 +1,4 @@
-import React, { props } from "react";
+import React from "react";
 import { Navbar, Nav, Container, Button } from "react-bootstrap";
 
 const Header = ({
@@ -10,11 +10,11 @@ const Header = ({
 }) => {
   return (
     <Navbar bg="dark" variant="dark" expand="lg">
-      <Container>
+      <Container id="home" >
         <Navbar.Brand href="#home">
           <img
             alt="Alchemy Logo"
-            src="..\assets\images\logo\alchemy_logo.jpeg" // Replace with the path to your logo image
+            src="\assets\images\logo\alchemy_logo.jpeg" // Replace with the path to your logo image
             width="30"
             height="30"
             className="d-inline-block align-top"
@@ -24,6 +24,7 @@ const Header = ({
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
+          <Nav.Link href="#home">Home</Nav.Link>
             <Nav.Link href="#recipes">Recipes</Nav.Link>
             <Nav.Link href="#shop">Shop</Nav.Link>
             <Nav.Link href="#about">About</Nav.Link>

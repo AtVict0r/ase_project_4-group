@@ -1,17 +1,14 @@
 import React from "react";
 import { Modal, Button } from "react-bootstrap";
 import Review from "./Review";
-import shopItems from "./../shop/shopItems.json";
-import reviews from "./reviews.json";
 
-const RecipeDetail = ({ recipe, show, onHide, onShowLogin, onAddToCart }) => {
+const RecipeDetail = ({ recipe, reviews, show, shopItems, onHide, user, onShowLogin, onAddToCart, onEdit, onDelete }) => {
   const shopItemNames = new Set(shopItems.map((item) => item.name));
   const recipeReviews = reviews.filter(
     (review) => review.recipeId === recipe.id
   );
 
   const addReview = (reviewText) => {
-    // Here you would normally handle adding the review to your data
     console.log("Adding review:", reviewText);
   };
 
@@ -58,11 +55,18 @@ const RecipeDetail = ({ recipe, show, onHide, onShowLogin, onAddToCart }) => {
         </ol>
         <Review
           reviews={recipeReviews}
+          user={user}
           onShowLogin={onShowLogin}
           onAddReview={addReview}
         />
       </Modal.Body>
       <Modal.Footer>
+      <Button variant="info" onClick={() => onEdit(recipe)}>
+          Edit Recipe
+        </Button>
+        <Button variant="danger" onClick={() => onDelete(recipe.id)}>
+          Delete Recipe
+        </Button>
         <Button variant="secondary" onClick={onHide}>
           Close
         </Button>

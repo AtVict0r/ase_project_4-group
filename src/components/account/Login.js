@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Modal, Button, Form, Alert } from "react-bootstrap";
+import usersJson from "./users.json"
 
 const Login = ({ show, onShowSignUp, handleClose, setUser }) => {
   const [formData, setFormData] = useState({
@@ -28,7 +29,10 @@ const Login = ({ show, onShowSignUp, handleClose, setUser }) => {
     e.preventDefault();
     if (validateForm()) {
       // Handle the login logic here
-      const savedUser = JSON.parse(localStorage.getItem("user"));
+      const savedUser = usersJson.find(
+        (user) =>
+          user.email === formData.email && user.password === formData.password
+      );
       if (
         savedUser &&
         savedUser.email === formData.email &&
@@ -36,6 +40,7 @@ const Login = ({ show, onShowSignUp, handleClose, setUser }) => {
       ) {
         console.log("Form data submitted:", formData);
         setUser(savedUser);
+        localStorage.setItem("user", JSON.stringify(savedUser));
         handleClose();
       } else {
         alert("Invalid email or password");

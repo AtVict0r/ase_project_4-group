@@ -3,19 +3,19 @@ import { Carousel, Container } from "react-bootstrap";
 
 const carouselItems = [
   {
-    src: "./../assets/images/image1.png",
+    src: "/assets/images/carousel/image1.png",
     alt: "First slide",
     title: "Recipe 1",
     caption: "Discover the magic of our top alchemy recipe.",
   },
   {
-    src: "./../assets/images/image2.png",
+    src: "/assets/images/carousel/image2.png",
     alt: "Second slide",
     title: "Recipe 2",
     caption: "Experience the enchantment of our second best recipe.",
   },
   {
-    src: "./../assets/images/image3.png",
+    src: "/assets/images/carousel/image3.png",
     alt: "Third slide",
     title: "Recipe 3",
     caption: "Step into the mystical world with our third favorite recipe.",

@@ -16,6 +16,11 @@ const Footer = ({ onContactClick }) => {
             <h5>Quick Links</h5>
             <ul className="list-unstyled">
               <li>
+                <a href="#home" className="text-white">
+                  Home
+                </a>
+              </li>
+              <li>
                 <a href="#recipes" className="text-white">
                   Recipes
                 </a>

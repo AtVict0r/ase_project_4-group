@@ -5,11 +5,25 @@ import { FaThumbsUp, FaThumbsDown } from "react-icons/fa";
 const Review = ({ reviews, onAddReview, user, onShowLogin }) => {
   const [showForm, setShowForm] = useState(false);
   const [reviewText, setReviewText] = useState("");
+  const [like, setLike] = useState(null);
+  const [error, setError] = useState("");
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    if (!reviewText || like === null) { 
+      setError("Please fill out all fields."); 
+      return;
+    }
+    const review = {
+      userId: user.id,
+      username: user.username,
+      comment: reviewText,
+      like: like
+    };
     onAddReview(reviewText);
     setReviewText("");
+    setLike(null);
+    setError("");
     setShowForm(false);
   };
 
@@ -49,6 +63,28 @@ const Review = ({ reviews, onAddReview, user, onShowLogin }) => {
                   onChange={(e) => setReviewText(e.target.value)}
                 />
               </Form.Group>
+              <Form.Group>
+                <Form.Label>Do you like this recipe?</Form.Label>
+                <div>
+                <Form.Check
+                  type="radio"
+                  label={<FaThumbsUp />}
+                  name="like"
+                  value="true"
+                  checked={like === true}
+                  onChange={(e) => setLike(true)}
+                />
+                <Form.Check
+                  type="radio"
+                  label={<FaThumbsDown />}
+                  name="like"
+                  value="false"
+                  checked={like === false}
+                  onChange={(e) => setLike(false)}
+                />
+                </div>
+              </Form.Group>
+              {error && <p style={{ color: "red" }}>{error}</p>}
               <Button variant="primary" type="submit">
                 Submit
               </Button>
