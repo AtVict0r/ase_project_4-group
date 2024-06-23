@@ -65,11 +65,11 @@ const Recipe = ({ user, recipes, reviews, shopItems, onShowLogin, onAddToCart })
   return (
     <Container id="recipes">
       <h2 className="text-center my-4">Alchemy Recipes</h2>
-      <Col className="d-flex justify-content-start my-3">
+      {user && (<Col className="d-flex justify-content-start my-3">
         <Button variant="secondary" onClick={() => setShowAddModal(true)}>
           Add Recipe
         </Button>
-      </Col>
+      </Col>)}
       <AddRecipe
         show={showAddModal}
         handleClose={() => setShowAddModal(false)}
@@ -79,6 +79,7 @@ const Recipe = ({ user, recipes, reviews, shopItems, onShowLogin, onAddToCart })
         {currentRecipes.map((recipe, index) => (
           <Col xs={12} md={6} lg={4} className="mb-3 d-flex justify-content-center" key={recipe.id}>
             <RecipeCard
+              user={user}
               recipe={recipe}
               onShowDetails={showDetails}
               onEdit={handleEdit}

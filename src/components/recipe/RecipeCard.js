@@ -2,7 +2,7 @@ import React from "react";
 import { Card, Button } from "react-bootstrap";
 import { PencilSquare, Trash } from "react-bootstrap-icons";
 
-const RecipeCard = ({ recipe, onShowDetails, onEdit, onDelete }) => {
+const RecipeCard = ({ user, recipe, onShowDetails, onEdit, onDelete }) => {
   return (
     <Card style={{ width: "18rem" }}>
       <Card.Img variant="top" src={recipe.imageUrl} alt={recipe.name} />
@@ -12,12 +12,13 @@ const RecipeCard = ({ recipe, onShowDetails, onEdit, onDelete }) => {
         <Button variant="primary" onClick={() => onShowDetails(recipe)}>
           Learn More
         </Button>
-        <Button variant="outline-secondary" onClick={() => onEdit(recipe)}>
+        {user && (<>
+          <Button variant="outline-secondary" onClick={() => onEdit(recipe)}>
           <PencilSquare />
         </Button>
         <Button variant="outline-danger" onClick={() => onDelete(recipe.id)}>
           <Trash />
-        </Button>
+        </Button></>)}
       </Card.Body>
     </Card>
   );

@@ -132,7 +132,7 @@ export default function App() {
           </Col>
           {cartItems.length > 0 && (
             <Col xs={12} md={1} lg={2}>
-              <Cart user={user} cartItems={cartItems} onLoginClick={handleLoginClick} onSignupClick={handleSignupClick} onRemoveFromCart={removeFromCart} onQuantityChange={onQuantityChange} onCheckout={onCheckout} />
+              <Cart api={API_ENDPOINT} user={user} cartItems={cartItems} onLoginClick={handleLoginClick} onSignupClick={handleSignupClick} onRemoveFromCart={removeFromCart} onQuantityChange={onQuantityChange} onCheckout={onCheckout} />
             </Col>
           )}
         </Row>

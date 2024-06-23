@@ -61,12 +61,14 @@ const RecipeDetail = ({ recipe, reviews, show, shopItems, onHide, user, onShowLo
         />
       </Modal.Body>
       <Modal.Footer>
+      {user && (<>
       <Button variant="info" onClick={() => onEdit(recipe)}>
           Edit Recipe
         </Button>
         <Button variant="danger" onClick={() => onDelete(recipe.id)}>
           Delete Recipe
         </Button>
+      </>)}
         <Button variant="secondary" onClick={onHide}>
           Close
         </Button>
