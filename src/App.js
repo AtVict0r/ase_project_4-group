@@ -24,6 +24,7 @@ export default function App() {
   const [reviews, setReviews] = useState([]);
   const [cartItems, setCartItems] = useState([]);
   const [orders, setOrders] = useState([]);
+  const [search, setSearch] = useState(false);
   const [showSignUp, setShowSignUp] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [showContact, setShowContact] = useState(false);
@@ -85,7 +86,7 @@ export default function App() {
     fetchShopItems();
 
     if (user) { fetchOrders(); }
-  }, []);
+  }, [user, search]);
 
   const addToCart = (item) => {
     const existingItem = cartItems.find((cartItem) => cartItem.id === item.id);
@@ -182,6 +183,11 @@ export default function App() {
         onLoginClick={handleLoginClick}
         onSignupClick={handleSignupClick}
         onContactClick={handleContactClick}
+        recipes={recipes} 
+        setRecipes={setRecipes} 
+        shopItems={shopItems} 
+        setShopItems={setShopItems}
+        setSearch={setSearch}
       />
       <SignUp
         api={API_ENDPOINT}
@@ -201,10 +207,10 @@ export default function App() {
       <Container fluid>
         <Row>
           <Col xs={12} md={11} lg={10}>
-            <Hero />
+            {!search && (<Hero />)}
             <Recipe api={API_ENDPOINT} user={user} recipes={recipes} setRecipes={setRecipes} reviews={reviews} setReviews={setReviews} shopItems={shopItems} onShowLogin={handleLoginClick} onAddToCart={addToCart} />
             <Shop api={API_ENDPOINT} shopItems={shopItems} setShopItems={setShopItems} onAddToCart={addToCart} />
-            <About />
+            {!search && (<About />)}
           </Col>
           {cartItems.length > 0 && (
             <Col xs={12} md={1} lg={2}>

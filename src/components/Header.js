@@ -1,5 +1,6 @@
 import React from "react";
 import { Navbar, Nav, Container, Button } from "react-bootstrap";
+import Search from "./Search"
 
 const Header = ({
   user,
@@ -7,6 +8,11 @@ const Header = ({
   onLoginClick,
   onSignupClick,
   onContactClick,
+  recipes, 
+  setRecipes, 
+  shopItems, 
+  setShopItems,
+  setSearch
 }) => {
   return (
     <Navbar bg="dark" variant="dark" expand="lg">
@@ -31,6 +37,9 @@ const Header = ({
             <Nav.Link href="#contact" onClick={onContactClick}>
               Contact
             </Nav.Link>
+          </Nav>
+          <Nav>
+            <Search setSearch={setSearch} recipes={recipes} setRecipes={setRecipes} shopItems={shopItems} setShopItems={setShopItems} />
           </Nav>
           <Nav>
             {user ? (

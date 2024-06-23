@@ -1,31 +1,50 @@
-import React, { useState } from 'react';
-import { Form, Button } from 'react-bootstrap';
+import React, { useState, useEffect } from 'react';
 
-function Search({ setSearchedRecipes, recipes }) {
-  const [searchTerm, setSearchTerm] = useState('');
+const Search = ({ setSearch, recipes, setRecipes, shopItems, setShopItems }) => {
+  const [searchText, setSearchText] = useState('');
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const searchedRecipes = recipes.filter(recipe => recipe.title.toLowerCase().includes(searchTerm.toLowerCase()));
-    setSearchedRecipes(searchedRecipes);
-  };
+  useEffect(() => {
+    if (searchText === '') {
+      setSearch(false);
+      return;
+    }
+
+    setSearch(true);
+
+    const lowerCaseSearchText = searchText.toLowerCase();
+
+    const filteredRecipes = recipes.filter(recipe => {
+      return (
+        recipe.name.toLowerCase().includes(lowerCaseSearchText) ||
+        recipe.description.toLowerCase().includes(lowerCaseSearchText) ||
+        recipe.ingredients.some(ingredient =>
+          ingredient.toLowerCase().includes(lowerCaseSearchText)
+        ) ||
+        recipe.instructions.some(instruction =>
+          instruction.toLowerCase().includes(lowerCaseSearchText)
+        )
+      );
+    });
+
+    const filteredShopItems = shopItems.filter(item => {
+      return (
+        item.name.toLowerCase().includes(lowerCaseSearchText) ||
+        item.description.toLowerCase().includes(lowerCaseSearchText)
+      );
+    });
+
+    setRecipes(filteredRecipes);
+    setShopItems(filteredShopItems);
+  }, [searchText, recipes, setRecipes, shopItems, setShopItems]);
 
   return (
-    <Form onSubmit={handleSubmit}>
-      <Form.Group controlId="search">
-        <Form.Label>Search Recipes</Form.Label>
-        <Form.Control
-          type="text"
-          placeholder="Enter search term"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </Form.Group>
-      <Button variant="primary" type="submit">
-        Search
-      </Button>
-    </Form>
+    <input
+      type="text"
+      placeholder="Search..."
+      value={searchText}
+      onChange={e => setSearchText(e.target.value)}
+    />
   );
-}
+};
 
 export default Search;
