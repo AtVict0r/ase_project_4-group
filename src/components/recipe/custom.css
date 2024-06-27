@@ -1,0 +1,19 @@
+/* custom.css */
+#recipes {
+  margin-top: 2rem;
+}
+
+.recipe-card {
+  width: 100%;
+  max-width: 300px;
+  margin: auto;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.my-4 {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}

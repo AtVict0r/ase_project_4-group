@@ -10,7 +10,7 @@ import Cart from "./components/shop/Cart";
 import About from "./components/About";
 import Footer from "./components/Footer";
 import "./styles.css";
-import { Container, Row, Col } from "react-bootstrap";
+import { Container, Row, Col, Alert } from "react-bootstrap";
 import recipesJson from "./data/recipes.json";
 import reviewsJson from "./data/reviews.json";
 import shopItemsJson from "./data/shopItems.json";
@@ -28,26 +28,31 @@ export default function App() {
   const [showSignUp, setShowSignUp] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [showContact, setShowContact] = useState(false);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  useEffect(() => {
+    const updateOnlineStatus = () => {
+      setIsOnline(navigator.onLine);
+    };
+
+    window.addEventListener("online", updateOnlineStatus);
+    window.addEventListener("offline", updateOnlineStatus);
+
+    return () => {
+      window.removeEventListener("online", updateOnlineStatus);
+      window.removeEventListener("offline", updateOnlineStatus);
+    };
+  }, []);
 
   useEffect(() => {
     const fetchRecipes = async () => {
       try {
         const response = await fetch(`${API_ENDPOINT}/get_all_recipes`);
-        if (!response.ok) throw new Error("API call failed");
+        if (!response.ok) {
+          throw new Error("API call failed");
+        }
         const data = await response.json();
-        console.log("API response data for recipes:", data);
-        if (!Array.isArray(data))
-          throw new Error("API returned non-array data");
-        const formattedData = data.map((recipe) => ({
-          id: recipe.id,
-          name: recipe.name,
-          description: recipe.description,
-          imageurl: recipe.imageurl,
-          category: recipe.category,
-          ingredients: recipe.ingredients,
-          instructions: recipe.instructions,
-        }));
-        setRecipes(formattedData);
+        setRecipes(data);
       } catch (error) {
         console.error("API call failed:", error);
         setRecipes(recipesJson);
@@ -59,18 +64,7 @@ export default function App() {
         const response = await fetch(`${API_ENDPOINT}/shop-items`);
         if (!response.ok) throw new Error("API call failed");
         const data = await response.json();
-        console.log("API response data for shop items:", data);
-        if (!Array.isArray(data.items))
-          throw new Error("API returned non-array data");
-        const formattedData = data.items.map((item) => ({
-          id: item.id,
-          name: item.name,
-          description: item.description,
-          price: item.price,
-          quantity: item.quantity,
-          image: item.image,
-        }));
-        setShopItems(formattedData);
+        setShopItems(data);
       } catch (error) {
         console.error("API call failed:", error);
         setShopItems(shopItemsJson);
@@ -82,16 +76,7 @@ export default function App() {
         const response = await fetch(`${API_ENDPOINT}/reviews/all`);
         if (!response.ok) throw new Error("API call failed");
         const data = await response.json();
-        console.log("API response data for reviews:", data);
-        if (!Array.isArray(data.reviews))
-          throw new Error("API returned non-array data");
-        const formattedData = data.reviews.map((review) => ({
-          id: review.id,
-          user: review.user,
-          comment: review.comment,
-          liked: review.liked,
-        }));
-        setReviews(formattedData);
+        setReviews(data);
       } catch (error) {
         console.error("API call failed:", error);
         setReviews(reviewsJson);
@@ -111,14 +96,15 @@ export default function App() {
       }
     };
 
-    fetchRecipes();
-    fetchReviews();
-    fetchShopItems();
-
-    if (user) {
-      fetchOrders();
+    if (isOnline) {
+      fetchRecipes();
+      fetchReviews();
+      fetchShopItems();
+      if (user) {
+        fetchOrders();
+      }
     }
-  }, [user, search]);
+  }, [user, search, isOnline]);
 
   const addToCart = (item) => {
     const existingItem = cartItems.find((cartItem) => cartItem.id === item.id);
@@ -245,23 +231,33 @@ export default function App() {
         <Row>
           <Col xs={12} md={11} lg={10}>
             {!search && <Hero />}
-            <Recipe
-              api={API_ENDPOINT}
-              user={user}
-              recipes={recipes}
-              setRecipes={setRecipes}
-              reviews={reviews}
-              setReviews={setReviews}
-              shopItems={shopItems}
-              onShowLogin={handleLoginClick}
-              onAddToCart={addToCart}
-            />
-            <Shop
-              api={API_ENDPOINT}
-              shopItems={shopItems}
-              setShopItems={setShopItems}
-              onAddToCart={addToCart}
-            />
+            {!isOnline && (
+              <Alert variant="warning" className="text-center">
+                You are currently offline. Please check your internet
+                connection.
+              </Alert>
+            )}
+            {isOnline && (
+              <>
+                <Recipe
+                  api={API_ENDPOINT}
+                  user={user}
+                  recipes={recipes}
+                  setRecipes={setRecipes}
+                  reviews={reviews}
+                  setReviews={setReviews}
+                  shopItems={shopItems}
+                  onShowLogin={handleLoginClick}
+                  onAddToCart={addToCart}
+                />
+                <Shop
+                  api={API_ENDPOINT}
+                  shopItems={shopItems}
+                  setShopItems={setShopItems}
+                  onAddToCart={addToCart}
+                />
+              </>
+            )}
             {!search && <About />}
           </Col>
           {cartItems.length > 0 && (

@@ -1,33 +1,70 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import RecipeCard from "./RecipeCard";
 import RecipeDetail from "./RecipeDetail";
 import AddRecipe from "./AddRecipe";
 import EditRecipe from "./EditRecipe";
 import { Container, Row, Col, Button } from "react-bootstrap";
 
-const Recipe = ({ api, user, recipes, reviews, shopItems, onShowLogin, onAddToCart }) => {
+const API_ENDPOINT = "http://127.0.0.1:8000";
+
+const Recipe = ({
+  api,
+  user,
+  recipes,
+  setRecipes,
+  reviews,
+  setReviews,
+  shopItems,
+  onShowLogin,
+  onAddToCart,
+}) => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
+  const [formattedData, setFormattedData] = useState([]);
   const recipesPerPage = 6;
 
-  // calculate the total number of pages
-  const totalPages = Math.ceil(recipes.length / recipesPerPage);
+  useEffect(() => {
+    const fetchRecipes = async () => {
+      try {
+        const response = await fetch(`${API_ENDPOINT}/get_all_recipes`);
+        if (!response.ok) throw new Error("API call failed");
+        const data = await response.json();
+        console.log("API response data for recipes:", data);
+        if (!Array.isArray(data.recipes))
+          throw new Error("API returned non-array data");
+        const formatted = data.recipes.map((recipes) => ({
+          id: recipes.id,
+          name: recipes.name,
+          description: recipes.description,
+          imageurl: recipes.imageurl,
+          category: recipes.category,
+          ingredients: recipes.ingredients,
+          instructions: recipes.instructions,
+        }));
+        setRecipes(formatted);
+        setFormattedData(formatted);
+      } catch (error) {
+        console.error("API call failed:", error);
+      }
+    };
 
-  // get current recipes
+    fetchRecipes();
+  }, [setRecipes]);
+
+  const totalPages = Math.ceil(recipes.length / recipesPerPage);
   const currentRecipes = recipes.slice(
     currentPage * recipesPerPage,
     (currentPage + 1) * recipesPerPage
   );
 
-  // change page
   const paginate = (direction) => {
     setCurrentPage((prevPage) => {
       let nextPage = prevPage + direction;
-      if (nextPage < 0) nextPage = totalPages - 1; // loop back to last page
-      if (nextPage >= totalPages) nextPage = 0; // loop back to first page
+      if (nextPage < 0) nextPage = totalPages - 1;
+      if (nextPage >= totalPages) nextPage = 0;
       return nextPage;
     });
   };
@@ -38,22 +75,33 @@ const Recipe = ({ api, user, recipes, reviews, shopItems, onShowLogin, onAddToCa
   };
 
   const handleAddRecipe = async (newRecipe) => {
-    console.log("New recipe added:", newRecipe);
-
     try {
-      const response = await fetch(`${api}/new_recipe`, {
-        method: 'POST',
+      const formattedRecipe = {
+        name: newRecipe.name,
+        description: newRecipe.description,
+        imageurl: newRecipe.imageurl || "https://example.com/default-image.jpg",
+        category: newRecipe.category,
+        ingredients: newRecipe.ingredients.join("\n"),
+        instructions: newRecipe.instructions.join("\n"),
+      };
+
+      const response = await fetch(`${API_ENDPOINT}/recipes/add`, {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(newRecipe),
+        body: JSON.stringify(formattedRecipe),
       });
-  
-      if (!response.ok) {
+
+      if (!response.ok)
         throw new Error(`HTTP error! status: ${response.status}`);
-      }
+
+      const data = await response.json();
+      console.log("Recipe added successfully:", data);
+      setRecipes((prevRecipes) => [...prevRecipes, data]);
+      setFormattedData((prevData) => [...prevData, data]);
     } catch (error) {
-      console.error('Failed to create the recipe:', error);
+      console.error("Failed to create the recipe:", error);
     }
   };
 
@@ -65,65 +113,97 @@ const Recipe = ({ api, user, recipes, reviews, shopItems, onShowLogin, onAddToCa
 
   const handleUpdateRecipe = async (updatedRecipe) => {
     console.log("Updated recipe:", updatedRecipe);
-    
+
     try {
-      const response = await fetch(`${api}/recipes/edit/${updatedRecipe.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedRecipe),
-      });
-  
+      const response = await fetch(
+        `${API_ENDPOINT}/recipes/edit/${updatedRecipe.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updatedRecipe),
+        }
+      );
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
+      const data = await response.json();
+      setRecipes((prevRecipes) =>
+        prevRecipes.map((recipe) => (recipe.id === data.id ? data : recipe))
+      );
+      setFormattedData((prevData) =>
+        prevData.map((recipe) => (recipe.id === data.id ? data : recipe))
+      );
     } catch (error) {
-      console.error('Failed to update the recipe:', error);
+      console.error("Failed to update the recipe:", error);
     }
 
     setShowEditModal(false);
     setShowDetailsModal(true);
   };
 
-  const handleDelete = async (recipeId) => {
-    console.log("Deleted recipe with id:", recipeId);
+  const handleDelete = async (recipe) => {
+    if (!recipe || !recipe.id) {
+      console.error("Recipe or Recipe ID is undefined");
+      return;
+    }
+
+    console.log("Deleting recipe with id:", recipe.id);
 
     try {
-      const response = await fetch(`${api}/delete_recipe/${recipeId}`, {
-        method: 'DELETE',
-      });
-  
+      const response = await fetch(
+        `${API_ENDPOINT}/delete_recipe/${recipe.id}`,
+        {
+          method: "DELETE",
+        }
+      );
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
-      }  
+      }
+      setRecipes((prevRecipes) =>
+        prevRecipes.filter((r) => r.id !== recipe.id)
+      );
+      setFormattedData((prevData) =>
+        prevData.filter((r) => r.id !== recipe.id)
+      );
     } catch (error) {
-      console.error('Failed to delete the recipe:', error);
+      console.error("Failed to delete the recipe:", error);
     }
   };
 
   return (
     <Container id="recipes">
       <h2 className="text-center my-4">Alchemy Recipes</h2>
-      {user && (<Col className="d-flex justify-content-start my-3">
-        <Button variant="secondary" onClick={() => setShowAddModal(true)}>
-          Add Recipe
-        </Button>
-      </Col>)}
+      {user && (
+        <Col className="d-flex justify-content-start my-3">
+          <Button variant="secondary" onClick={() => setShowAddModal(true)}>
+            Add Recipe
+          </Button>
+        </Col>
+      )}
       <AddRecipe
         show={showAddModal}
         handleClose={() => setShowAddModal(false)}
         handleAddRecipe={handleAddRecipe}
       />
       <Row>
-        {currentRecipes.map((recipe, index) => (
-          <Col xs={12} md={6} lg={4} className="mb-3 d-flex justify-content-center" key={recipe.id}>
+        {currentRecipes.map((recipe) => (
+          <Col
+            xs={12}
+            md={6}
+            lg={4}
+            className="mb-3 d-flex justify-content-center"
+            key={recipe.id} // Ensure each item has a unique key
+          >
             <RecipeCard
               user={user}
               recipe={recipe}
               onShowDetails={showDetails}
               onEdit={handleEdit}
-              onDelete={handleDelete}
+              onDelete={() => handleDelete(recipe)}
             />
           </Col>
         ))}

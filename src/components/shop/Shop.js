@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState } from "react"; // Ensure useState is imported
 import ShopItemCard from "./ShopItemCard";
-import ItemInfo from "./ItemInfo"; 
+import ItemInfo from "./ItemInfo";
 import { Container, Row, Col, Button } from "react-bootstrap";
 
-const Shop = ({ shopItems, onAddToCart }) => {
+const Shop = ({ shopItems = [], onAddToCart }) => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [selectedItem, setSelectedItem] = useState(null);
@@ -11,16 +11,18 @@ const Shop = ({ shopItems, onAddToCart }) => {
 
   const totalPages = Math.ceil(shopItems.length / itemsPerPage);
 
-  const currentItems = shopItems.slice(
-    currentPage * itemsPerPage,
-    (currentPage + 1) * itemsPerPage
-  );
+  const currentItems = Array.isArray(shopItems)
+    ? shopItems.slice(
+        currentPage * itemsPerPage,
+        (currentPage + 1) * itemsPerPage
+      )
+    : [];
 
   const paginate = (direction) => {
     setCurrentPage((prevPage) => {
       let nextPage = prevPage + direction;
-      if (nextPage < 0) nextPage = totalPages - 1; // loop back to last page
-      if (nextPage >= totalPages) nextPage = 0; // loop back to first page
+      if (nextPage < 0) nextPage = totalPages - 1;
+      if (nextPage >= totalPages) nextPage = 0;
       return nextPage;
     });
   };
@@ -35,8 +37,18 @@ const Shop = ({ shopItems, onAddToCart }) => {
       <h2 className="text-center my-4">Alchemy Shop</h2>
       <Row>
         {currentItems.map((item, index) => (
-          <Col xs={12} md={6} lg={4} className="mb-3 d-flex justify-content-center" key={index}>
-            <ShopItemCard item={item} onShowDetails={showDetails} onAddToCart={onAddToCart} />
+          <Col
+            xs={12}
+            md={6}
+            lg={4}
+            className="mb-3 d-flex justify-content-center"
+            key={index}
+          >
+            <ShopItemCard
+              item={item}
+              onShowDetails={showDetails}
+              onAddToCart={onAddToCart}
+            />
           </Col>
         ))}
       </Row>
@@ -49,10 +61,15 @@ const Shop = ({ shopItems, onAddToCart }) => {
         </Col>
       </Row>
       {selectedItem && showDetailsModal && (
-        <ItemInfo item={selectedItem} show={showDetailsModal} onHide={() => {
-          setSelectedItem(null);
-          setShowDetailsModal(false);
-        }} onAddToCart={onAddToCart} />
+        <ItemInfo
+          item={selectedItem}
+          show={showDetailsModal}
+          onHide={() => {
+            setSelectedItem(null);
+            setShowDetailsModal(false);
+          }}
+          onAddToCart={onAddToCart}
+        />
       )}
     </Container>
   );
