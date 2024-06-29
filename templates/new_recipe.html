@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Edit Recipe</title>
+    <title>Add or Edit a Recipe</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'styles.css' %}" />
   </head>
@@ -18,9 +18,12 @@
       </ul>
     </nav>
 
-    <div class="edit-recipe">
-      <h1>Edit Recipe</h1>
-      <form method="POST" action="{% url 'edit_recipe' recipe.id %}">
+    <div class="add-recipe">
+      <h1>{{ recipe.id|yesno:"Edit,Add" }} Recipe</h1>
+      <form
+        method="POST"
+        action="{% if recipe.id %}{% url 'edit_recipe' recipe.id %}{% else %}{% url 'new_recipe' %}{% endif %}"
+      >
         {% csrf_token %}
         <label for="name">Recipe Name:</label><br />
         <input
@@ -48,7 +51,6 @@
           id="imageurl"
           name="imageurl"
           value="{{ recipe.imageurl }}"
-          required
         /><br /><br />
 
         <label for="category">Category:</label><br />
@@ -106,7 +108,7 @@
 
       function showAuthenticatedSections() {
         document.getElementById("main-nav").style.display = "block";
-        document.querySelector(".edit-recipe").style.display = "block";
+        document.querySelector(".add-recipe").style.display = "block";
       }
 
       document

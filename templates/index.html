@@ -14,14 +14,14 @@
         <li><a href="{% url 'about' %}">About</a></li>
         <li><a href="{% url 'recipes' %}">Recipes</a></li>
         <li><a href="#" id="sign-off">Sign Off</a></li>
-        <li><a href="#" id="profile-settings-link">Profile Settings</a></li>
+        <li><a href="{% url 'profile_settings' %}">Profile Settings</a></li>
       </ul>
     </nav>
 
     <div id="welcome-section" style="display: none">
       <h1>Welcome to the Recipe Book</h1>
       <p>Practice 1: Display recipes</p>
-      <p>Test out 2 other routes (get_recipe and add_recipe)</p>
+      <p>Test out 2 other routes (get_recipe and new_recipe)</p>
       <p>Practice writing loops with Django Template Language</p>
     </div>
 
@@ -34,12 +34,16 @@
           <h3>{{ recipe.name }}</h3>
           <p><strong>Description:</strong> {{ recipe.description }}</p>
           <p><strong>Category:</strong> {{ recipe.category }}</p>
+          {% if recipe.imageurl|default:'' and recipe.imageurl|urlize %}
           <img
             src="{{ recipe.imageurl }}"
             alt="{{ recipe.name }}"
             width="100"
             height="100"
           />
+          {% else %}
+          <p>{{ recipe.imageurl }}</p>
+          {% endif %}
           <p><strong>Ingredients:</strong></p>
           <ul>
             {% for ingredient in recipe.ingredients.splitlines %}
@@ -63,7 +67,7 @@
     </div>
 
     <div id="actions-section" style="display: none">
-      <a href="{% url 'add_recipe' %}">Add a New Recipe</a>
+      <a href="{% url 'new_recipe' %}">Add a New Recipe</a>
       <a href="{% url 'remove_recipe' %}">Remove Recipe</a>
     </div>
 
@@ -115,45 +119,102 @@
       <p id="login-message"></p>
     </div>
 
-    <div id="profile-settings" style="display: none">
-      <h1>Profile Settings</h1>
-      <form id="profile-form">
-        <label for="first_name">First Name:</label>
-        <input type="text" id="first_name" name="first_name" required /><br />
-        <label for="last_name">Last Name:</label>
-        <input type="text" id="last_name" name="last_name" required /><br />
-        <label for="profile_email">New Email:</label>
-        <input
-          type="email"
-          id="profile_email"
-          name="new_email"
-          required
-        /><br />
-        <button type="submit">Update Profile</button>
-      </form>
-      <form id="password-form">
-        <label for="current_password">Current Password:</label>
-        <input
-          type="password"
-          id="current_password"
-          name="current_password"
-          required
-        /><br />
-        <label for="new_password">New Password:</label>
-        <input
-          type="password"
-          id="new_password"
-          name="new_password"
-          required
-        /><br />
-        <button type="submit">Change Password</button>
-      </form>
-      <button type="button" id="delete-account-button">Delete Account</button>
-      <p id="profile-message"></p>
-      <button type="button" id="go-back-home">Go Back to Home</button>
-    </div>
-
     <script>
+      class Auth {
+        constructor(csrfToken) {
+          this.csrfToken = csrfToken;
+          this.init();
+        }
+
+        init() {
+          document
+            .getElementById("signup-form")
+            .addEventListener("submit", (event) => this.signup(event));
+          document
+            .getElementById("login-form")
+            .addEventListener("submit", (event) => this.login(event));
+          document
+            .getElementById("sign-off")
+            .addEventListener("click", () => this.signOff());
+          document.addEventListener("DOMContentLoaded", () => {
+            const token = localStorage.getItem("token");
+            if (token) {
+              this.showAuthenticatedSections();
+            }
+          });
+        }
+
+        async signup(event) {
+          event.preventDefault();
+          const first_name = document.getElementById("signup_first_name").value;
+          const last_name = document.getElementById("signup_last_name").value;
+          const email = document.getElementById("signup_email").value;
+          const password = document.getElementById("signup_password").value;
+
+          const response = await fetch("{% url 'signup' %}", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": this.csrfToken,
+            },
+            body: JSON.stringify({ first_name, last_name, email, password }),
+          });
+
+          const data = await response.json();
+          const messageElement = document.getElementById("signup-message");
+
+          if (response.ok) {
+            messageElement.textContent = "Signup successful.";
+            messageElement.style.color = "green";
+          } else {
+            messageElement.textContent = data.error || "Signup failed.";
+            messageElement.style.color = "red";
+          }
+        }
+
+        async login(event) {
+          event.preventDefault();
+          const email = document.getElementById("login_email").value;
+          const password = document.getElementById("login_password").value;
+
+          const response = await fetch("{% url 'login' %}", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": this.csrfToken,
+            },
+            body: JSON.stringify({ email, password }),
+          });
+
+          const data = await response.json();
+          const messageElement = document.getElementById("login-message");
+
+          if (response.ok) {
+            messageElement.textContent = "Login successful.";
+            messageElement.style.color = "green";
+            localStorage.setItem("token", data.access);
+            this.showAuthenticatedSections();
+          } else {
+            messageElement.textContent = data.error || "Login failed.";
+            messageElement.style.color = "red";
+          }
+        }
+
+        signOff() {
+          localStorage.removeItem("token");
+          location.reload();
+        }
+
+        showAuthenticatedSections() {
+          document.getElementById("main-nav").style.display = "block";
+          document.getElementById("welcome-section").style.display = "block";
+          document.getElementById("recipes-section").style.display = "block";
+          document.getElementById("actions-section").style.display = "block";
+          document.getElementById("login-section").style.display = "none";
+          document.getElementById("signup-section").style.display = "none";
+        }
+      }
+
       function getCSRFToken() {
         let cookieValue = null;
         if (document.cookie && document.cookie !== "") {
@@ -170,242 +231,7 @@
       }
 
       const csrfToken = getCSRFToken();
-
-      document
-        .getElementById("signup-form")
-        .addEventListener("submit", async function (event) {
-          event.preventDefault();
-          const first_name = document.getElementById("signup_first_name").value;
-          const last_name = document.getElementById("signup_last_name").value;
-          const email = document.getElementById("signup_email").value;
-          const password = document.getElementById("signup_password").value;
-
-          const response = await fetch("{% url 'signup' %}", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "X-CSRFToken": csrfToken,
-            },
-            body: JSON.stringify({ first_name, last_name, email, password }),
-          });
-
-          const data = await response.json();
-          const messageElement = document.getElementById("signup-message");
-
-          if (response.ok) {
-            messageElement.textContent = "Signup successful.";
-            messageElement.style.color = "green";
-          } else {
-            messageElement.textContent = data.message;
-            messageElement.style.color = "red";
-          }
-        });
-
-      document
-        .getElementById("login-form")
-        .addEventListener("submit", async function (event) {
-          event.preventDefault();
-          const email = document.getElementById("login_email").value;
-          const password = document.getElementById("login_password").value;
-
-          const response = await fetch("{% url 'login' %}", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "X-CSRFToken": csrfToken,
-            },
-            body: JSON.stringify({ email, password }),
-          });
-
-          const data = await response.json();
-          const messageElement = document.getElementById("login-message");
-
-          if (response.ok) {
-            messageElement.textContent = "Login successful.";
-            messageElement.style.color = "green";
-            localStorage.setItem("token", data.token);
-            showAuthenticatedSections();
-          } else {
-            messageElement.textContent = data.message;
-            messageElement.style.color = "red";
-          }
-        });
-
-      document.addEventListener("DOMContentLoaded", async function () {
-        const token = localStorage.getItem("token");
-        if (token) {
-          showAuthenticatedSections();
-        }
-      });
-
-      function showAuthenticatedSections() {
-        document.getElementById("main-nav").style.display = "block";
-        document.getElementById("welcome-section").style.display = "block";
-        document.getElementById("recipes-section").style.display = "block";
-        document.getElementById("actions-section").style.display = "block";
-        document.getElementById("login-section").style.display = "none";
-        document.getElementById("signup-section").style.display = "none";
-      }
-
-      document
-        .getElementById("sign-off")
-        .addEventListener("click", function () {
-          localStorage.removeItem("token");
-          location.reload();
-        });
-
-      document
-        .getElementById("profile-settings-link")
-        .addEventListener("click", function () {
-          document.getElementById("profile-settings").style.display = "block";
-          document.getElementById("welcome-section").style.display = "none";
-          document.getElementById("recipes-section").style.display = "none";
-          document.getElementById("actions-section").style.display = "none";
-          fetchUserInfo();
-        });
-
-      document
-        .getElementById("go-back-home")
-        .addEventListener("click", function () {
-          document.getElementById("profile-settings").style.display = "none";
-          document.getElementById("welcome-section").style.display = "block";
-          document.getElementById("recipes-section").style.display = "block";
-          document.getElementById("actions-section").style.display = "block";
-        });
-
-      function fetchUserInfo() {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          console.error("Token not found in local storage.");
-          return;
-        }
-
-        fetch("{% url 'get_user_info' %}", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": csrfToken,
-            Authorization: "Bearer " + token,
-          },
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            document.getElementById("first_name").value = data.firstName;
-            document.getElementById("last_name").value = data.lastName;
-            document.getElementById("profile_email").value = data.email;
-            document.getElementById("profile-message").textContent = "";
-          })
-          .catch((error) => {
-            console.error("Error fetching user info:", error);
-            const messageElement = document.getElementById("profile-message");
-            messageElement.textContent = error.message;
-            messageElement.style.color = "red";
-          });
-      }
-
-      document
-        .getElementById("profile-form")
-        .addEventListener("submit", async function (event) {
-          event.preventDefault();
-          const first_name = document.getElementById("first_name").value;
-          const last_name = document.getElementById("last_name").value;
-          const new_email = document.getElementById("profile_email").value;
-
-          const response = await fetch("{% url 'update_name' %}", {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              "X-CSRFToken": csrfToken,
-              Authorization: "Bearer " + localStorage.getItem("token"),
-            },
-            body: JSON.stringify({
-              firstName: first_name,
-              lastName: last_name,
-              newEmail: new_email,
-            }),
-          });
-
-          const data = await response.json();
-          const messageElement = document.getElementById("profile-message");
-
-          if (response.ok) {
-            messageElement.textContent = "Profile updated successfully.";
-            messageElement.style.color = "green";
-          } else {
-            messageElement.textContent = data.message;
-            messageElement.style.color = "red";
-          }
-        });
-
-      document
-        .getElementById("password-form")
-        .addEventListener("submit", async function (event) {
-          event.preventDefault();
-          const current_password =
-            document.getElementById("current_password").value;
-          const new_password = document.getElementById("new_password").value;
-
-          const response = await fetch("{% url 'update_password' %}", {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              "X-CSRFToken": csrfToken,
-              Authorization: "Bearer " + localStorage.getItem("token"),
-            },
-            body: JSON.stringify({
-              oldPassword: current_password,
-              newPassword: new_password,
-            }),
-          });
-
-          const data = await response.json();
-          const messageElement = document.getElementById("profile-message");
-
-          if (response.ok) {
-            messageElement.textContent = "Password updated successfully.";
-            messageElement.style.color = "green";
-          } else {
-            messageElement.textContent = data.message;
-            messageElement.style.color = "red";
-          }
-        });
-
-      document
-        .getElementById("delete-account-button")
-        .addEventListener("click", async function () {
-          const confirmation = confirm(
-            "Are you sure you want to delete your account? This action cannot be undone."
-          );
-          if (confirmation) {
-            const token = localStorage.getItem("token");
-            const response = await fetch("{% url 'delete_account' %}", {
-              method: "DELETE",
-              headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": csrfToken,
-                Authorization: "Bearer " + token,
-              },
-            });
-
-            const messageElement = document.getElementById("profile-message");
-
-            if (response.ok) {
-              alert("Account deleted successfully.");
-              localStorage.removeItem("token");
-              document.getElementById("sign-off").click();
-            } else {
-              try {
-                const data = await response.json();
-                messageElement.textContent = data.message;
-                messageElement.style.color = "red";
-              } catch (error) {
-                console.error("Error deleting account:", error);
-                messageElement.textContent = "Error deleting account.";
-                messageElement.style.color = "red";
-              }
-            }
-          }
-        });
+      const auth = new Auth(csrfToken);
     </script>
   </body>
 </html>

@@ -40,6 +40,15 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from .models import User
 from .serializers import UserSerializer
+from django.urls import reverse
+from django.utils import timezone
+from django.contrib.auth import authenticate, login
+from urllib.parse import urlparse
+from django.contrib.auth.views import LoginView
+from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+
+
 
 @ensure_csrf_cookie
 def get_csrf_token(request):
@@ -49,6 +58,26 @@ def get_csrf_token(request):
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+    def create(self, request, *args, **kwargs):
+        email = request.data.get('email')
+        if User.objects.filter(email=email).exists():
+            return Response({"message": "User with this email already exists."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return super().create(request, *args, **kwargs)
+
+
+class SignupView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+    def create(self, request, *args, **kwargs):
+        email = request.data.get('email')
+        if User.objects.filter(email=email).exists():
+            return Response({"error": "Email already exists."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return super().create(request, *args, **kwargs)
+
 
 @api_view(['POST'])
 def login(request):
@@ -158,10 +187,6 @@ def delete_account(request):
         logging.exception(f"Error deleting user: {str(e)}")
         return JsonResponse({'message': f'Error deleting user: {str(e)}'}, status=500)
 
-# Recipe-related views...
-
-# ShopItem-related views...
-
 # Review-related views...
 
 
@@ -207,7 +232,7 @@ def update_name(request):
     
 @csrf_exempt
 @require_http_methods(["DELETE"])
-def delete_account(request):
+def old_delete_account(request):
     try:
         auth_header = request.headers.get('Authorization')
         if auth_header is None:
@@ -233,8 +258,9 @@ def delete_account(request):
 
 def index(request):
     recipes = Recipe.objects.all()
+    if not recipes.exists():
+        print("No recipes found in the database.")
     return render(request, 'index.html', {'recipes': recipes})
-
 
 
 def about(request):
@@ -333,6 +359,32 @@ def delete_recipe(request):
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
+@login_required    
+def new_recipe(request):
+    if request.method == "POST":
+        name = request.POST.get("name")
+        description = request.POST.get("description")
+        imageurl = request.POST.get("imageurl")
+        category = request.POST.get("category")
+        ingredients = request.POST.get("ingredients")
+        instructions = request.POST.get("instructions")
+        
+        new_recipe = Recipe(
+            name=name,
+            description=description,
+            imageurl=imageurl,
+            category=category,
+            ingredients=ingredients,
+            instructions=instructions
+        )
+        new_recipe.save()
+        
+        return HttpResponseRedirect(
+            f'{reverse("thankyou_add")}?name={name}&description={description}&imageurl={imageurl}&category={category}&ingredients={ingredients}&instructions={instructions}'
+        )
+    else:
+        return render(request, 'new_recipe.html')  # Render the form for GET requests
+
 
 @csrf_exempt
 def remove_recipe(request):
@@ -419,6 +471,7 @@ def get_all_recipes(request):
 
     
 @csrf_exempt
+@login_required
 @require_http_methods(["GET"])
 def get_recipe(request, id=None):
     # Initialize query parameters
@@ -511,17 +564,9 @@ def add_recipe(request):
     except Exception as e:
         logger.error(f"Error creating recipe: {str(e)}")
         return JsonResponse({'error': str(e)}, status=500)
+    
 
  
-import logging
-from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
-from django.views.decorators.http import require_POST
-from .models import Recipe
-import json
-
-logger = logging.getLogger(__name__)
-
 import logging
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
@@ -607,14 +652,13 @@ def thankyou_add(request):
 
 
 
-def new_recipe(request):
-    return render(request, 'new_recipe.html')
 
 def recipes(request):
     all_recipes = Recipe.objects.all()
     return render(request, 'recipes.html', {'recipes': all_recipes})
 
-def profile_settings(request):
+@login_required
+def old_profile_settings(request):
     if request.method == 'POST':
         profile_form = ProfileUpdateForm(request.POST, instance=request.user)
         password_form = PasswordChangeFormCustom(request.user, request.POST)
@@ -646,23 +690,67 @@ def profile_settings(request):
     }
     return render(request, 'profile_settings.html', context)
 
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from .forms import ProfileUpdateForm
+
+from django.shortcuts import render, redirect
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.decorators import login_required
+from .forms import ProfileUpdateForm, PasswordChangeFormCustom, DeleteAccountForm
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from .forms import ProfileUpdateForm, PasswordChangeFormCustom, DeleteAccountForm
+
+@login_required
+def profile_settings(request):
+    if request.method == 'POST':
+        profile_form = ProfileUpdateForm(request.POST, instance=request.user)
+        password_form = PasswordChangeFormCustom(request.user, request.POST)
+        delete_form = DeleteAccountForm(request.POST)
+
+        if profile_form.is_valid():
+            profile_form.save()
+            return redirect('profile_settings')
+
+        if password_form.is_valid():
+            user = password_form.save()
+            update_session_auth_hash(request, user)  # Update session for new password
+            return redirect('profile_settings')
+
+        if delete_form.is_valid():
+            user = request.user
+            user.delete()  # Account deletion logic
+            return redirect('index')  # Redirect to index after deletion
+
+    else:
+        profile_form = ProfileUpdateForm(instance=request.user)
+        password_form = PasswordChangeFormCustom(request.user)
+        delete_form = DeleteAccountForm()
+
+    context = {
+        'profile_form': profile_form,
+        'password_form': password_form,
+        'delete_form': delete_form,
+        'user': request.user,  # Pass the user object to the template
+    }
+    return render(request, 'profile_settings.html', context)
+
+
+
+
 
 @login_required
 def get_user_info(request):
-    if request.method == 'GET':
-        user = request.user
-        logger.debug(f"Fetching user info for: {user.email}")
-        user_info = {
-            'firstName': user.first_name,
-            'lastName': user.last_name,
-            'email': user.email,
-        }
-        logger.debug(f"User info: {user_info}")
-        return JsonResponse(user_info)
-    else:
-        logger.debug("Invalid request method")
-        return JsonResponse({'message': 'Invalid request method.'}, status=405)
-    
+    user = request.user
+    user_info = {
+        'first_name': user.first_name,
+        'last_name': user.last_name,
+        'email': user.email,
+        'last_login': user.last_login.isoformat() if user.last_login else None,
+    }
+    return JsonResponse(user_info)
+
 
 
 def recipe_detail(request, pk):
@@ -1064,3 +1152,203 @@ def delete_review(request):
 
     except Exception as e:
         return Response({'status': 'error', 'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+from django.utils import timezone
+
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+import logging
+
+logger = logging.getLogger(__name__)
+
+@api_view(['POST'])
+def login_view(request):
+    email = request.data.get('email')
+    password = request.data.get('password')
+    
+    if not email or not password:
+        return Response({'error': 'Email and password are required.'}, status=400)
+    
+    try:
+        user = User.objects.get(email=email)
+    except User.DoesNotExist:
+        return Response({'error': 'Account does not exist.'}, status=400)
+    
+    user = authenticate(email=email, password=password)
+    if user:
+        user.last_login = timezone.now()
+        user.save()
+        logger.debug(f"User {user.email} last_login updated to {user.last_login}")
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        })
+    return Response({'error': 'Invalid password.'}, status=400)
+
+
+
+
+
+@login_required
+def get_imageurl(request):
+    user = request.user
+    imageurl = user.profile.imageurl
+
+    # Validate the imageurl or handle text data
+    if imageurl:
+        parsed_url = urlparse(imageurl)
+        if not parsed_url.scheme or not parsed_url.netloc:
+            # Handle invalid URL, consider it as text data
+            return JsonResponse({'imageurl': imageurl, 'type': 'text'})
+        else:
+            return JsonResponse({'imageurl': imageurl, 'type': 'url'})
+    else:
+        return JsonResponse({'imageurl': None, 'type': 'none'})
+
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from .forms import ProfileUpdateForm, PasswordChangeFormCustom, DeleteAccountForm
+import logging
+
+logger = logging.getLogger(__name__)
+
+@login_required
+def profile_settings(request):
+    logger.debug(f"Current user: {request.user.email}, last login: {request.user.last_login}")
+    
+    if request.method == 'POST':
+        profile_form = ProfileUpdateForm(request.POST, instance=request.user)
+        password_form = PasswordChangeFormCustom(request.user, request.POST)
+        delete_form = DeleteAccountForm(request.POST)
+
+        if profile_form.is_valid():
+            profile_form.save()
+            return redirect('profile_settings')
+
+        if password_form.is_valid():
+            user = password_form.save()
+            update_session_auth_hash(request, user)  # Update session for new password
+            return redirect('profile_settings')
+
+        if delete_form.is_valid():
+            user = request.user
+            user.delete()  # Account deletion logic
+            return redirect('index')  # Redirect to index after deletion
+
+    else:
+        profile_form = ProfileUpdateForm(instance=request.user)
+        password_form = PasswordChangeFormCustom(request.user)
+        delete_form = DeleteAccountForm()
+
+    context = {
+        'profile_form': profile_form,
+        'password_form': password_form,
+        'delete_form': delete_form,
+        'user': request.user,  # Pass the user object to the template
+    }
+    return render(request, 'profile_settings.html', context)
+
+from django.contrib.auth import authenticate, login as auth_login
+from django.utils import timezone
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+import logging
+
+logger = logging.getLogger(__name__)
+
+@api_view(['POST'])
+def login_view(request):
+    email = request.data.get('email')
+    password = request.data.get('password')
+    
+    if not email or not password:
+        return Response({'error': 'Email and password are required.'}, status=400)
+    
+    try:
+        user = User.objects.get(email=email)
+    except User.DoesNotExist:
+        return Response({'error': 'Account does not exist.'}, status=400)
+    
+    user = authenticate(email=email, password=password)
+    if user:
+        user.last_login = timezone.now()
+        user.save()
+        auth_login(request, user)  # Log the user in
+        logger.debug(f"User {user.email} last_login updated to {user.last_login}")
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        })
+    return Response({'error': 'Invalid password.'}, status=400)
+
+
+# views.py
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.shortcuts import redirect
+from django.contrib.auth import get_user_model
+from django.contrib.auth import update_session_auth_hash
+from .forms import ChangeFirstNameForm, ChangeLastNameForm, ChangeEmailForm, PasswordChangeFormCustom
+
+User = get_user_model()
+
+@login_required
+def change_first_name(request):
+    if request.method == 'POST':
+        form = ChangeFirstNameForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'First name updated successfully.')
+        else:
+            messages.error(request, 'Failed to update first name. Please correct the errors below.')
+    return redirect('profile_settings')
+
+@login_required
+def change_last_name(request):
+    if request.method == 'POST':
+        form = ChangeLastNameForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Last name updated successfully.')
+        else:
+            messages.error(request, 'Failed to update last name. Please correct the errors below.')
+    return redirect('profile_settings')
+
+@login_required
+def change_email(request):
+    if request.method == 'POST':
+        form = ChangeEmailForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            request.user.email = email
+            request.user.save()
+            messages.success(request, 'Email updated successfully.')
+        else:
+            if form.errors.get('email'):
+                messages.error(request, form.errors['email'][0])
+            else:
+                messages.error(request, 'Failed to update email. Please correct the errors below.')
+    return redirect('profile_settings')
+
+
+@login_required
+def change_password(request):
+    if request.method == 'POST':
+        form = PasswordChangeFormCustom(user=request.user, data=request.POST)
+        if form.is_valid():
+            new_password = form.cleaned_data['new_password']
+            request.user.set_password(new_password)
+            request.user.save()
+            update_session_auth_hash(request, request.user)
+            messages.success(request, 'Password changed successfully.')
+        else:
+            for field in form.errors:
+                for error in form.errors[field]:
+                    messages.error(request, error)
+    return redirect('profile_settings')
