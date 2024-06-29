@@ -47,6 +47,8 @@ from urllib.parse import urlparse
 from django.contrib.auth.views import LoginView
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+from django.shortcuts import render, get_list_or_404
+from .models import Recipe
 
 
 
@@ -470,16 +472,30 @@ def get_all_recipes(request):
     
 
     
+from django.shortcuts import get_list_or_404
+from django.http import JsonResponse, Http404
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_http_methods
+from .models import Recipe
+
+from django.shortcuts import get_list_or_404, render
+from django.http import JsonResponse, Http404
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_http_methods
+from .models import Recipe
+
 @csrf_exempt
 @login_required
 @require_http_methods(["GET"])
-def get_recipe(request, id=None):
+def get_recipe(request, recipe_id=None):
     # Initialize query parameters
     query_params = {}
 
     # Retrieve parameters from GET request
-    if id is None:
-        id = request.GET.get('id')
+    if recipe_id is None:
+        recipe_id = request.GET.get('id')
     name = request.GET.get('name')
     description = request.GET.get('description')
     imageurl = request.GET.get('imageurl')
@@ -487,11 +503,11 @@ def get_recipe(request, id=None):
     ingredients = request.GET.get('ingredients')
     instructions = request.GET.get('instructions')
 
-    # Try to convert id to integer if it's provided
-    if id is not None:
+    # Try to convert recipe_id to integer if it's provided
+    if recipe_id is not None:
         try:
-            id = int(id)
-            query_params['id'] = id
+            recipe_id = int(recipe_id)
+            query_params['id'] = recipe_id
         except ValueError:
             raise Http404("Invalid recipe ID")
     
@@ -526,6 +542,12 @@ def get_recipe(request, id=None):
     } for recipe in recipes]
 
     return JsonResponse(recipes_list, safe=False, status=200)
+
+
+# views.py
+from django.shortcuts import render, get_object_or_404
+from .models import Recipe
+
 
 import logging
 from django.views.decorators.csrf import csrf_exempt
