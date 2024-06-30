@@ -1,58 +1,78 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import RecipeCard from "./RecipeCard";
 import RecipeDetail from "./RecipeDetail";
 import AddRecipe from "./AddRecipe";
 import EditRecipe from "./EditRecipe";
 import { Container, Row, Col, Button } from "react-bootstrap";
+import recipesJson from "../../data/recipes.json";
 
 const API_ENDPOINT = "http://127.0.0.1:8000";
 
+const getCSRFToken = () => {
+  const cookies = document.cookie.split(";");
+  for (let cookie of cookies) {
+    const [name, value] = cookie.split("=");
+    if (name.trim() === "csrftoken") {
+      return decodeURIComponent(value);
+    }
+  }
+  return null;
+};
+
+const csrfToken = getCSRFToken();
+
 const Recipe = ({
-  api,
+  api = API_ENDPOINT,
   user,
-  recipes,
-  setRecipes,
   reviews,
   setReviews,
   shopItems,
   onShowLogin,
   onAddToCart,
 }) => {
+  const [recipes, setRecipes] = useState(recipesJson);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
-  const [formattedData, setFormattedData] = useState([]);
   const recipesPerPage = 6;
 
-  useEffect(() => {
-    const fetchRecipes = async () => {
-      try {
-        const response = await fetch(`${API_ENDPOINT}/get_all_recipes`);
-        if (!response.ok) throw new Error("API call failed");
-        const data = await response.json();
-        console.log("API response data for recipes:", data);
-        if (!Array.isArray(data.recipes))
-          throw new Error("API returned non-array data");
-        const formatted = data.recipes.map((recipes) => ({
-          id: recipes.id,
-          name: recipes.name,
-          description: recipes.description,
-          imageurl: recipes.imageurl,
-          category: recipes.category,
-          ingredients: recipes.ingredients,
-          instructions: recipes.instructions,
-        }));
-        setRecipes(formatted);
-        setFormattedData(formatted);
-      } catch (error) {
-        console.error("API call failed:", error);
+  const fetchRecipes = useCallback(async () => {
+    try {
+      console.log("Fetching recipes...");
+      const response = await fetch(`${API_ENDPOINT}/recipes/get_all`);
+      if (!response.ok) throw new Error("API call failed");
+      const data = await response.json();
+      if (!Array.isArray(data)) {
+        console.error("API returned non-array data");
+        throw new Error("API returned non-array data");
       }
-    };
+      const formatted = data.map((recipe) => ({
+        id: recipe.id,
+        name: recipe.name,
+        description: recipe.description,
+        imageurl: recipe.imageurl || recipe.imagurl || recipesJson[0].imageurl, // Default image fallback
+        category: recipe.category,
+        ingredients: recipe.ingredients,
+        instructions: recipe.instructions,
+      }));
+      setRecipes(formatted);
+    } catch (error) {
+      console.error("API call failed:", error);
+      setRecipes(recipesJson); // Fallback to local JSON data
+    }
+  }, []);
 
-    fetchRecipes();
-  }, [setRecipes]);
+  useEffect(() => {
+    fetchRecipes(); // Fetch recipes initially
+  }, [fetchRecipes]);
+
+  useEffect(() => {
+    if (!recipes || !Array.isArray(recipes)) {
+      setRecipes(recipesJson); // Ensure recipes is always an array and fallback to local JSON data
+    }
+  }, [recipes]);
 
   const totalPages = Math.ceil(recipes.length / recipesPerPage);
   const currentRecipes = recipes.slice(
@@ -76,30 +96,21 @@ const Recipe = ({
 
   const handleAddRecipe = async (newRecipe) => {
     try {
-      const formattedRecipe = {
-        name: newRecipe.name,
-        description: newRecipe.description,
-        imageurl: newRecipe.imageurl || "https://example.com/default-image.jpg",
-        category: newRecipe.category,
-        ingredients: newRecipe.ingredients.join("\n"),
-        instructions: newRecipe.instructions.join("\n"),
-      };
-
-      const response = await fetch(`${API_ENDPOINT}/recipes/add`, {
+      const response = await fetch(`${api}/recipes/add`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "X-CSRFToken": csrfToken,
         },
-        body: JSON.stringify(formattedRecipe),
+        body: JSON.stringify(newRecipe),
       });
 
       if (!response.ok)
         throw new Error(`HTTP error! status: ${response.status}`);
 
       const data = await response.json();
-      console.log("Recipe added successfully:", data);
-      setRecipes((prevRecipes) => [...prevRecipes, data]);
-      setFormattedData((prevData) => [...prevData, data]);
+      await fetchRecipes(); // Re-fetch the recipes
+      setShowAddModal(false); // Close the add recipe modal
     } catch (error) {
       console.error("Failed to create the recipe:", error);
     }
@@ -111,64 +122,48 @@ const Recipe = ({
     setShowEditModal(true);
   };
 
-  const handleUpdateRecipe = async (updatedRecipe) => {
-    console.log("Updated recipe:", updatedRecipe);
-
+  const handleUpdateRecipe = async (recipeId, updatedRecipe) => {
     try {
-      const response = await fetch(
-        `${API_ENDPOINT}/recipes/edit/${updatedRecipe.id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(updatedRecipe),
-        }
-      );
+      const response = await fetch(`${api}/recipes/update/${recipeId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": csrfToken,
+        },
+        body: JSON.stringify(updatedRecipe),
+      });
 
       if (!response.ok) {
+        if (response.status === 403) throw new Error("Unauthorized");
+        if (response.status === 404) throw new Error("Recipe not found");
         throw new Error(`HTTP error! status: ${response.status}`);
       }
+
       const data = await response.json();
-      setRecipes((prevRecipes) =>
-        prevRecipes.map((recipe) => (recipe.id === data.id ? data : recipe))
-      );
-      setFormattedData((prevData) =>
-        prevData.map((recipe) => (recipe.id === data.id ? data : recipe))
-      );
+      await fetchRecipes(); // Re-fetch the recipes
+      setShowEditModal(false); // Close the edit recipe modal
     } catch (error) {
       console.error("Failed to update the recipe:", error);
     }
-
-    setShowEditModal(false);
-    setShowDetailsModal(true);
   };
 
-  const handleDelete = async (recipe) => {
-    if (!recipe || !recipe.id) {
-      console.error("Recipe or Recipe ID is undefined");
-      return;
-    }
-
-    console.log("Deleting recipe with id:", recipe.id);
-
+  const handleDelete = async (recipeId) => {
     try {
-      const response = await fetch(
-        `${API_ENDPOINT}/delete_recipe/${recipe.id}`,
-        {
-          method: "DELETE",
-        }
-      );
+      const response = await fetch(`${api}/recipes/delete/${recipeId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": csrfToken,
+        },
+      });
 
       if (!response.ok) {
+        if (response.status === 403) throw new Error("Unauthorized");
+        if (response.status === 404) throw new Error("Recipe not found");
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      setRecipes((prevRecipes) =>
-        prevRecipes.filter((r) => r.id !== recipe.id)
-      );
-      setFormattedData((prevData) =>
-        prevData.filter((r) => r.id !== recipe.id)
-      );
+
+      await fetchRecipes(); // Re-fetch the recipes
     } catch (error) {
       console.error("Failed to delete the recipe:", error);
     }
@@ -190,23 +185,30 @@ const Recipe = ({
         handleAddRecipe={handleAddRecipe}
       />
       <Row>
-        {currentRecipes.map((recipe) => (
-          <Col
-            xs={12}
-            md={6}
-            lg={4}
-            className="mb-3 d-flex justify-content-center"
-            key={recipe.id} // Ensure each item has a unique key
-          >
-            <RecipeCard
-              user={user}
-              recipe={recipe}
-              onShowDetails={showDetails}
-              onEdit={handleEdit}
-              onDelete={() => handleDelete(recipe)}
-            />
-          </Col>
-        ))}
+        {currentRecipes.length > 0 ? (
+          currentRecipes.map((recipe) => {
+            if (!recipe) return null; // Check for undefined recipe
+            return (
+              <Col
+                xs={12}
+                md={6}
+                lg={4}
+                className="mb-3 d-flex justify-content-center"
+                key={recipe.id} // Ensure each item has a unique key
+              >
+                <RecipeCard
+                  user={user}
+                  recipe={recipe}
+                  onShowDetails={showDetails}
+                  onEdit={handleEdit}
+                  onDelete={() => handleDelete(recipe.id)}
+                />
+              </Col>
+            );
+          })
+        ) : (
+          <div>No recipes available</div>
+        )}
       </Row>
       <Row className="justify-content-center my-4">
         <Col md={2} className="text-center">
@@ -239,7 +241,7 @@ const Recipe = ({
             show={showEditModal}
             onHide={() => {
               setShowEditModal(false);
-              setShowDetailsModal(true);
+              setShowDetailsModal(false);
             }}
             recipe={selectedRecipe}
             handleUpdateRecipe={handleUpdateRecipe}

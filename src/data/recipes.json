@@ -3,7 +3,7 @@
     "id": 1,
     "name": "Elixir of Focus",
     "description": "This alchemical concoction is believed to enhance mental clarity and concentration.",
-    "imageUrl": "/assets/images/recipes/recipe1.png",
+    "imagurl": "/assets/images/recipes/recipe1.png",
     "category": "Potions",
     "ingredients": [
       "1 part ginseng root, dried and ground",
@@ -23,7 +23,7 @@
     "id": 2,
     "name": "Philosopher's Stone Soup",
     "description": "A hearty and nourishing soup said to sustain the body and mind during long periods of study.",
-    "imageUrl": "/assets/images/recipes/recipe2.png",
+    "imagurl": "/assets/images/recipes/recipe2.png",
     "category": "Soups",
     "ingredients": [
       "1 tablespoon olive oil",
@@ -49,7 +49,7 @@
     "id": 3,
     "name": "Tincture of Tranquility",
     "description": "This calming tincture is said to soothe the mind and promote relaxation.",
-    "imageUrl": "/assets/images/recipes/recipe3.png",
+    "imagurl": "/assets/images/recipes/recipe3.png",
     "category": "Tinctures",
     "ingredients": [
       "1/2 cup lavender flowers, dried",
@@ -68,7 +68,7 @@
     "id": 4,
     "name": "Philosopher's Stone Bread",
     "description": "A bread said to enhance wisdom and knowledge.",
-    "imageUrl": "/assets/images/recipes/recipe4.png",
+    "imagurl": "/assets/images/recipes/recipe4.png",
     "category": "Breads",
     "ingredients": [
       "2 cups all-purpose flour",
@@ -96,7 +96,7 @@
     "id": 5,
     "name": "Elixir of Invisibility",
     "description": "A potent potion rumored to grant temporary invisibility.",
-    "imageUrl": "/assets/images/recipes/recipe5.png",
+    "imagurl": "/assets/images/recipes/recipe5.png",
     "category": "Potions",
     "ingredients": [
       "1 chameleon scale, ground (ethically sourced, of course)",
@@ -119,7 +119,7 @@
     "id": 6,
     "name": "Elixir of Strength",
     "description": "A fortifying concoction said to enhance physical prowess.",
-    "imageUrl": "/assets/images/recipes/recipe6.png",
+    "imagurl": "/assets/images/recipes/recipe6.png",
     "category": "Potions",
     "ingredients": [
       "1 ounce ginseng root, sliced",
@@ -139,7 +139,7 @@
     "id": 7,
     "name": "Growth Elixir",
     "description": "A legendary potion said to accelerate plant growth.",
-    "imageUrl": "/assets/images/recipes/recipe7.png",
+    "imagurl": "/assets/images/recipes/recipe7.png",
     "category": "Potions",
     "ingredients": [
       "1 sprig of willow bark, fresh",
@@ -159,7 +159,7 @@
     "id": 8,
     "name": "Elixir of Healing",
     "description": "A restorative potion believed to accelerate wound healing.",
-    "imageUrl": "/assets/images/recipes/recipe8.png",
+    "imagurl": "/assets/images/recipes/recipe8.png",
     "category": "Potions",
     "ingredients": [
       "1 comfrey leaf, crushed",
@@ -178,7 +178,7 @@
     "id": 9,
     "name": "Philosopher's Stone Stew (Vegetarian)",
     "description": "A hearty and nourishing stew inspired by the Philosopher's Stone Soup, suitable for vegetarians.",
-    "imageUrl": "/assets/images/recipes/recipe9.png",
+    "imagurl": "/assets/images/recipes/recipe9.png",
     "category": "Soups",
     "ingredients": [
       "1 tablespoon olive oil",
@@ -208,7 +208,7 @@
     "id": 10,
     "name": "Elixir of Charisma",
     "description": "A social potion rumored to enhance confidence and charm.",
-    "imageUrl": "/assets/images/recipes/recipe10.png",
+    "imagurl": "/assets/images/recipes/recipe10.png",
     "category": "Potions",
     "ingredients": [
       "1 rose petal, dried",
@@ -230,7 +230,7 @@
     "id": 11,
     "name": "Elixir of Dexterity",
     "description": "A potion believed to improve coordination and agility.",
-    "imageUrl": "/assets/images/recipes/recipe11.png",
+    "imagurl": "/assets/images/recipes/recipe11.png",
     "category": "Potions",
     "ingredients": [
       "1 teaspoon guarana powder",
@@ -250,7 +250,7 @@
     "id": 12,
     "name": "Philosopher's Stone Smoothie",
     "description": "A refreshing and brain-boosting smoothie inspired by the Philosopher's Stone.",
-    "imageUrl": "/assets/images/recipes/recipe12.png",
+    "imagurl": "/assets/images/recipes/recipe12.png",
     "category": "Drinks",
     "ingredients": [
       "1 cup blueberries",
@@ -269,7 +269,7 @@
     "id": 13,
     "name": "Elixir of Sleep",
     "description": "A calming potion said to promote restful sleep.",
-    "imageUrl": "/assets/images/recipes/recipe13.png",
+    "imagurl": "/assets/images/recipes/recipe13.png",
     "category": "Potions",
     "ingredients": [
       "1 chamomile tea bag",

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Header from "./components/Header";
 import SignUp from "./components/account/SignUp";
 import Login from "./components/account/Login";
@@ -29,40 +29,42 @@ export default function App() {
   const [showLogin, setShowLogin] = useState(false);
   const [showContact, setShowContact] = useState(false);
 
-  useEffect(() => {
-    const fetchRecipes = async () => {
-      try {
-        const response = await fetch(`${API_ENDPOINT}/get_all_recipes`);
-        if (!response.ok) throw new Error("API call failed");
-        const data = await response.json();
-        console.log("API response data for recipes:", data);
-        if (!Array.isArray(data))
-          throw new Error("API returned non-array data");
-        const formattedData = data.map((recipe) => ({
-          id: recipe.id,
-          name: recipe.name,
-          description: recipe.description,
-          imageurl: recipe.imageurl,
-          category: recipe.category,
-          ingredients: recipe.ingredients,
-          instructions: recipe.instructions,
-        }));
-        setRecipes(formattedData);
-      } catch (error) {
-        console.error("API call failed:", error);
-        setRecipes(recipesJson);
+  const fetchRecipes = useCallback(async () => {
+    try {
+      console.log("Fetching recipes...");
+      const response = await fetch(`${API_ENDPOINT}/recipes/get_all`);
+      if (!response.ok) throw new Error("API call failed");
+      const data = await response.json();
+      if (!Array.isArray(data)) {
+        console.error("API returned non-array data");
+        throw new Error("API returned non-array data");
       }
-    };
+      const formatted = data.map((recipe) => ({
+        id: recipe.id,
+        name: recipe.name,
+        description: recipe.description,
+        imageurl: recipe.imageurl || recipe.imagurl || recipesJson[0].imageurl, // Default image fallback
+        category: recipe.category,
+        ingredients: recipe.ingredients,
+        instructions: recipe.instructions,
+      }));
+      setRecipes(formatted);
+    } catch (error) {
+      console.error("API call failed:", error);
+      setRecipes(recipesJson); // Fallback to local JSON data
+    }
+  }, []);
 
+  useEffect(() => {
     const fetchShopItems = async () => {
       try {
         const response = await fetch(`${API_ENDPOINT}/shop-items`);
         if (!response.ok) throw new Error("API call failed");
         const data = await response.json();
         console.log("API response data for shop items:", data);
-        if (!Array.isArray(data.items))
+        if (!Array.isArray(data))
           throw new Error("API returned non-array data");
-        const formattedData = data.items.map((item) => ({
+        const formattedData = data.map((item) => ({
           id: item.id,
           name: item.name,
           description: item.description,
@@ -83,9 +85,9 @@ export default function App() {
         if (!response.ok) throw new Error("API call failed");
         const data = await response.json();
         console.log("API response data for reviews:", data);
-        if (!Array.isArray(data.reviews))
+        if (!Array.isArray(data))
           throw new Error("API returned non-array data");
-        const formattedData = data.reviews.map((review) => ({
+        const formattedData = data.map((review) => ({
           id: review.id,
           user: review.user,
           comment: review.comment,
@@ -99,6 +101,7 @@ export default function App() {
     };
 
     const fetchOrders = async () => {
+      if (!user) return;
       try {
         const response = await fetch(
           `${API_ENDPOINT}/orders/user_id=${user.id}`
@@ -118,7 +121,7 @@ export default function App() {
     if (user) {
       fetchOrders();
     }
-  }, [user, search]);
+  }, [user]);
 
   const addToCart = (item) => {
     const existingItem = cartItems.find((cartItem) => cartItem.id === item.id);
@@ -140,7 +143,7 @@ export default function App() {
     } else {
       setCartItems((prevItems) => [
         ...prevItems,
-        { ...item, quantity: 1, userId: user.id },
+        { ...item, quantity: 1, userId: user?.id },
       ]);
     }
 

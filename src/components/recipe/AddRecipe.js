@@ -1,36 +1,17 @@
 import React, { useState } from "react";
-import { Form, Button, Alert, Modal } from "react-bootstrap";
-import ThankYou from "./ThankYou";
+import { Modal, Form, Button } from "react-bootstrap";
 
 const AddRecipe = ({ show, handleClose, handleAddRecipe }) => {
-  const [newRecipe, setNewRecipe] = useState({
+  const initialRecipeState = {
     name: "",
     description: "",
-    imageUrl: null,
     category: "",
     ingredients: [""],
     instructions: [""],
-  });
-  const [errors, setErrors] = useState({});
-  const [showAlert, setShowAlert] = useState(false);
-  const [showThankYou, setShowThankYou] = useState(false);
-
-  const validateForm = () => {
-    let tempErrors = {};
-    tempErrors.name = newRecipe.name ? "" : "Name is required.";
-    tempErrors.description = newRecipe.description
-      ? ""
-      : "Description is required.";
-    tempErrors.category = newRecipe.category ? "" : "Category is required.";
-    tempErrors.ingredients = newRecipe.ingredients.every((i) => i)
-      ? ""
-      : "All ingredient fields must be filled.";
-    tempErrors.instructions = newRecipe.instructions.every((i) => i)
-      ? ""
-      : "All instruction fields must be filled.";
-    setErrors(tempErrors);
-    return Object.values(tempErrors).every((x) => x === "");
+    imageurl: "",
   };
+
+  const [newRecipe, setNewRecipe] = useState(initialRecipeState);
 
   const handleChange = (e, index, field) => {
     if (field === "ingredients" || field === "instructions") {
@@ -39,13 +20,8 @@ const AddRecipe = ({ show, handleClose, handleAddRecipe }) => {
       setNewRecipe({ ...newRecipe, [field]: updatedList });
     } else {
       const { name, value } = e.target;
-      if (name === "imageUrl") {
-        setNewRecipe({ ...newRecipe, [name]: e.target.files[0] });
-      } else {
-        setNewRecipe({ ...newRecipe, [name]: value });
-      }
+      setNewRecipe({ ...newRecipe, [name]: value });
     }
-    setErrors({ ...errors, [e.target.name]: "" });
   };
 
   const handleAddField = (field) => {
@@ -54,94 +30,90 @@ const AddRecipe = ({ show, handleClose, handleAddRecipe }) => {
 
   const handleRemoveField = (index, field) => {
     const updatedList = [...newRecipe[field]];
-    updatedList.splice(index, 1);
-    setNewRecipe({ ...newRecipe, [field]: updatedList });
+    if (updatedList.length > 1) {
+      updatedList.splice(index, 1);
+      setNewRecipe({ ...newRecipe, [field]: updatedList });
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (validateForm()) {
-      handleAddRecipe(newRecipe);
-      setShowAlert(true);
-      setShowThankYou(true);
-      setTimeout(() => {
-        setShowAlert(false);
-        handleClose();
-      }, 2000);
-    }
+    const formattedRecipe = {
+      ...newRecipe,
+      ingredients: newRecipe.ingredients.join("\n"),
+      instructions: newRecipe.instructions.join("\n"),
+    };
+    handleAddRecipe(formattedRecipe);
+    setNewRecipe(initialRecipeState);
   };
 
   return (
-    <Modal show={show} onHide={handleClose} centered>
+    <Modal
+      show={show}
+      onHide={() => {
+        handleClose();
+        setNewRecipe(initialRecipeState);
+      }}
+      centered
+    >
       <Modal.Header closeButton>
-        <Modal.Title>Add Alchemy Recipe</Modal.Title>
+        <Modal.Title>Add Recipe</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        {showAlert && (
-          <Alert variant="success">Recipe added successfully!</Alert>
-        )}
-        <Form noValidate onSubmit={handleSubmit}>
+        <Form onSubmit={handleSubmit}>
           <Form.Group className="mb-3">
             <Form.Label>Name</Form.Label>
             <Form.Control
               type="text"
               name="name"
               value={newRecipe.name}
-              onChange={handleChange}
-              isInvalid={!!errors.name}
+              onChange={(e) => handleChange(e, null, null)}
+              required
             />
-            <Form.Control.Feedback type="invalid">
-              {errors.name}
-            </Form.Control.Feedback>
           </Form.Group>
+
           <Form.Group className="mb-3">
             <Form.Label>Description</Form.Label>
             <Form.Control
               as="textarea"
               name="description"
               value={newRecipe.description}
-              onChange={handleChange}
-              isInvalid={!!errors.description}
+              onChange={(e) => handleChange(e, null, null)}
+              required
             />
-            <Form.Control.Feedback type="invalid">
-              {errors.description}
-            </Form.Control.Feedback>
           </Form.Group>
+
           <Form.Group className="mb-3">
-            <Form.Label>Image</Form.Label>
+            <Form.Label>Image URL</Form.Label>
             <Form.Control
-              type="file" // Change this to 'file'
-              name="imageUrl"
-              onChange={handleChange}
-              isInvalid={!!errors.imageUrl}
+              type="text"
+              name="imageurl"
+              value={newRecipe.imageurl}
+              onChange={(e) => handleChange(e, null, null)}
             />
-            <Form.Control.Feedback type="invalid">
-              {errors.imageUrl}
-            </Form.Control.Feedback>
           </Form.Group>
+
           <Form.Group className="mb-3">
             <Form.Label>Category</Form.Label>
             <Form.Control
               type="text"
               name="category"
               value={newRecipe.category}
-              onChange={handleChange}
-              isInvalid={!!errors.category}
+              onChange={(e) => handleChange(e, null, null)}
+              required
             />
-            <Form.Control.Feedback type="invalid">
-              {errors.category}
-            </Form.Control.Feedback>
           </Form.Group>
+
           <div>
             {newRecipe.ingredients.map((ingredient, index) => (
-              <Form.Group className="mb-3" key={index}>
+              <Form.Group className="mb-3" key={`ingredient-${index}`}>
                 <Form.Label>Ingredient {index + 1}</Form.Label>
                 <Form.Control
                   type="text"
                   name="ingredients"
                   value={ingredient}
                   onChange={(e) => handleChange(e, index, "ingredients")}
-                  isInvalid={!!errors.ingredients}
+                  required
                 />
                 {newRecipe.ingredients.length > 1 && (
                   <Button
@@ -153,13 +125,17 @@ const AddRecipe = ({ show, handleClose, handleAddRecipe }) => {
                 )}
               </Form.Group>
             ))}
-            <Button onClick={() => handleAddField("ingredients")}>
+            <Button
+              variant="secondary"
+              onClick={() => handleAddField("ingredients")}
+            >
               Add Ingredient
             </Button>
           </div>
+
           <div>
             {newRecipe.instructions.map((instruction, index) => (
-              <Form.Group className="mb-3" key={index}>
+              <Form.Group className="mb-3" key={`instruction-${index}`}>
                 <Form.Label>Instruction {index + 1}</Form.Label>
                 <Form.Control
                   as="textarea"
@@ -167,7 +143,7 @@ const AddRecipe = ({ show, handleClose, handleAddRecipe }) => {
                   name="instructions"
                   value={instruction}
                   onChange={(e) => handleChange(e, index, "instructions")}
-                  isInvalid={!!errors.instructions}
+                  required
                 />
                 {newRecipe.instructions.length > 1 && (
                   <Button
@@ -179,20 +155,19 @@ const AddRecipe = ({ show, handleClose, handleAddRecipe }) => {
                 )}
               </Form.Group>
             ))}
-            <Button onClick={() => handleAddField("instructions")}>
+            <Button
+              variant="secondary"
+              onClick={() => handleAddField("instructions")}
+            >
               Add Instruction
             </Button>
           </div>
-          <Button
-            variant="primary"
-            type="submit"
-            className="mt-4" // This adds a margin-top of 1.5rem (Bootstrap spacing scale)
-          >
+
+          <Button variant="primary" type="submit" className="mt-4">
             Add Recipe
           </Button>
         </Form>
       </Modal.Body>
-      {showThankYou && <ThankYou />}
     </Modal>
   );
 };

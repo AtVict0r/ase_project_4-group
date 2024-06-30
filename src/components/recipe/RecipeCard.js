@@ -1,23 +1,30 @@
 import React from "react";
 import { Card, Button } from "react-bootstrap";
+import { PencilSquare, Trash } from "react-bootstrap-icons";
 
 const RecipeCard = ({ user, recipe, onShowDetails, onEdit, onDelete }) => {
+  const defaultImageUrl = "/assets/images/default-recipe.png"; // Set your default image URL here
+  const imageUrl = recipe.imageurl || recipe.imagurl || defaultImageUrl;
+
   return (
-    <Card className="recipe-card">
-      <Card.Img variant="top" src={recipe.imageurl} alt={recipe.name} />
+    <Card style={{ width: "18rem" }}>
+      <Card.Img variant="top" src={imageUrl} alt={recipe.name} />
       <Card.Body>
         <Card.Title>{recipe.name}</Card.Title>
         <Card.Text>{recipe.description}</Card.Text>
         <Button variant="primary" onClick={() => onShowDetails(recipe)}>
-          View Details
+          Learn More
         </Button>
         {user && (
           <>
-            <Button variant="secondary" onClick={() => onEdit(recipe)}>
-              Edit
+            <Button variant="outline-secondary" onClick={() => onEdit(recipe)}>
+              <PencilSquare />
             </Button>
-            <Button variant="danger" onClick={() => onDelete(recipe.id)}>
-              Delete
+            <Button
+              variant="outline-danger"
+              onClick={() => onDelete(recipe.id)}
+            >
+              <Trash />
             </Button>
           </>
         )}
