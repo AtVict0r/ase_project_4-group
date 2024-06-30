@@ -1,6 +1,6 @@
+from corsheaders.defaults import default_headers
 from pathlib import Path
 from datetime import timedelta
-from corsheaders.defaults import default_headers
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -106,10 +106,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 APPEND_SLASH = False
 AUTH_USER_MODEL = 'myapp.User'
 
-CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # Add your frontend URL here
-]
+
 CORS_ALLOW_HEADERS = list(default_headers) + [
     'content-type',
 ]
@@ -120,18 +117,6 @@ PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.PBKDF2PasswordHasher',
     'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
 ]
-
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:3000",  # Add your frontend URL here
-]
-
-# If using Django's default CSRF middleware, these settings ensure CSRF tokens are correctly set.
-CSRF_COOKIE_HTTPONLY = False
-CSRF_COOKIE_SECURE = True
-
-# Ensure the CSRF cookie is set for all HTTP methods.
-CSRF_COOKIE_NAME = "csrftoken"
-CSRF_HEADER_NAME = "HTTP_X_CSRFTOKEN"
 
 LOGIN_URL = '/'  # Replace with your login URL
 
@@ -144,3 +129,32 @@ MESSAGE_TAGS = {
     messages.WARNING: 'warning',
     messages.ERROR: 'danger',
 }
+# settings.py
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",  # Add your frontend URL here
+]
+
+CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_SECURE = False  # Set to True only if using HTTPS in development
+
+# Ensure the CSRF cookie is set for all HTTP methods.
+CSRF_COOKIE_NAME = "csrftoken"
+CSRF_HEADER_NAME = "HTTP_X_CSRFTOKEN"
+
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # Add your frontend URL here
+]
+
+# Ensure Django's CSRF middleware is enabled
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',  # Ensure this is enabled
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]

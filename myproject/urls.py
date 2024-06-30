@@ -21,11 +21,11 @@ urlpatterns = [
     path('recipes/new', views.new_recipe, name='new_recipe'),
     path('recipes/add', views.add_recipe, name='add_recipe'),
     path('recipes/post', views.post_recipe, name='post_recipe'),
-    path('recipes/delete', views.delete_recipe, name='delete_recipe'),
+    path('recipes/delete/<int:id>', views.delete_recipe, name='delete_recipe'),
     path('recipes/remove', views.remove_recipe, name='remove_recipe'),
     path('recipes/get_all', views.get_all_recipes, name='get_all_recipes'),
     path('recipes/get/<int:recipe_id>', views.get_recipe, name='get_recipe'),
-    path('recipes/update', views.update_recipe, name='update_recipe'),
+    path('recipes/update/<int:id>', views.edit_recipe, name='edit_recipe'),
     
     path('thankyou/', views.thankyou, name='thankyou'),
     path('thankyou_add/', views.thankyou_add, name='thankyou_add'),

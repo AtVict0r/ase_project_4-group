@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.utils import timezone
+from django.core.validators import URLValidator
 
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -44,13 +45,21 @@ class UserProfile(models.Model):
 class Recipe(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField()
-    imageurl = models.URLField(db_column='imageurl')
-    category = models.CharField(max_length=100)
+    category = models.CharField(max_length=255)
     ingredients = models.TextField()
     instructions = models.TextField()
+    imageurl = models.URLField(validators=[URLValidator()])  # Validate URL
 
-    def __str__(self):
-        return self.name
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'description': self.description,
+            'category': self.category,
+            'ingredients': self.ingredients,
+            'instructions': self.instructions,
+            'imageurl': self.imageurl,
+        }
 
 # Review Model
 class Review(models.Model):

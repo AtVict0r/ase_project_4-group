@@ -304,62 +304,24 @@ def recipes(request):
     return render(request, 'recipes.html', {'recipes': all_recipes})
 
 
-# Function to handle recipe deletion
+## Get an instance of a logger
+logger = logging.getLogger(__name__)
+
+
 
 @csrf_exempt
-def delete_recipe(request):
-    if request.method in ["DELETE", "POST"]:
-        try:
-            if request.method == "POST":
-                data = json.loads(request.body)
-            else:
-                data = request.DELETE
+@require_http_methods(["DELETE"])
+def delete_recipe(request, id):
+    try:
+        recipe = Recipe.objects.get(id=id)
+        recipe.delete()
+        return JsonResponse({'status': 'success'})
+    except Recipe.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Recipe not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
-            id = data.get("id")
-            name = data.get("name")
-            description = data.get("description")
-            imageurl = data.get("imageurl")
-            category = data.get("category")
-            ingredients = data.get("ingredients")
-            instructions = data.get("instructions")
 
-            # Build the filter criteria based on the provided data
-            filter_criteria = {}
-            if id is not None:
-                filter_criteria['id'] = id
-            if name is not None:
-                filter_criteria['name__iexact'] = name
-            if description is not None:
-                filter_criteria['description__icontains'] = description
-            if imageurl is not None:
-                filter_criteria['imageurl__iexact'] = imageurl
-            if category is not None:
-                filter_criteria['category__iexact'] = category
-            if ingredients is not None:
-                filter_criteria['ingredients__icontains'] = ingredients
-            if instructions is not None:
-                filter_criteria['instructions__icontains'] = instructions
-
-            # Ensure at least one filter criteria is provided
-            if not filter_criteria:
-                return JsonResponse({'status': 'error', 'message': 'No valid parameter provided'}, status=400)
-
-            # Retrieve the recipe based on the filter criteria
-            try:
-                recipe = Recipe.objects.get(**filter_criteria)
-            except Recipe.DoesNotExist:
-                return JsonResponse({'status': 'error', 'message': 'Recipe not found'}, status=404)
-            except Recipe.MultipleObjectsReturned:
-                return JsonResponse({'status': 'error', 'message': 'Multiple recipes found. Provide more specific criteria.'}, status=400)
-
-            # Delete the found recipe
-            recipe.delete()
-            return JsonResponse({'status': 'success'})
-
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
-    else:
-        return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
 @login_required    
 def new_recipe(request):
@@ -544,57 +506,20 @@ def get_recipe(request, recipe_id=None):
     return JsonResponse(recipes_list, safe=False, status=200)
 
 
-# views.py
-from django.shortcuts import render, get_object_or_404
-from .models import Recipe
-
-
-import logging
-from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
+# views.pyfrom django.http import JsonResponse
+from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_POST
-from .models import Recipe
+from django.contrib.auth.decorators import login_required
 import json
+import logging
 
 logger = logging.getLogger(__name__)
 
-@csrf_exempt
-@require_POST
-def add_recipe(request):
-    try:
-        data = json.loads(request.body)
-
-        # Validate the incoming data
-        required_fields = ['name', 'description', 'imageurl', 'category', 'ingredients', 'instructions']
-        for field in required_fields:
-            if field not in data:
-                return JsonResponse({'error': f'Missing field: {field}'}, status=400)
-
-        recipe = Recipe(
-            name=data['name'],
-            description=data['description'],
-            imageurl=data['imageurl'],
-            category=data['category'],
-            ingredients=data['ingredients'],
-            instructions=data['instructions']
-        )
-        recipe.save()
-        return JsonResponse({'message': 'Recipe created successfully'}, status=201)
-    except json.JSONDecodeError:
-        logger.error("Invalid JSON format")
-        return JsonResponse({'error': 'Invalid JSON format'}, status=400)
-    except Exception as e:
-        logger.error(f"Error creating recipe: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=500)
-    
-
- 
-import logging
-from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_POST
-from .models import Recipe
+from django.contrib.auth.decorators import login_required
 import json
+import logging
 
 logger = logging.getLogger(__name__)
 
@@ -628,20 +553,23 @@ def add_recipe(request):
         return JsonResponse({'error': str(e)}, status=500)
 
 
-
+from django.shortcuts import render
 from django.http import JsonResponse
 from .models import Recipe
 
 def get_all_recipes(request):
-    recipes = list(Recipe.objects.all().values('name', 'description', 'imageurl', 'category', 'ingredients', 'instructions'))
+    recipes = list(Recipe.objects.all().values(
+        'id', 'name', 'description', 'imageurl', 'category', 'ingredients', 'instructions'
+    ))
     return JsonResponse(recipes, safe=False)
+
 
 # View for Shop Items
 from django.http import JsonResponse
 from .models import ShopItem
 
 def get_shop_items(request):
-    shop_items = list(ShopItem.objects.all().values('name', 'description', 'price', 'quantity', 'image'))
+    shop_items = list(ShopItem.objects.all().values('id','name', 'description', 'price', 'quantity', 'image'))
     return JsonResponse(shop_items, safe=False)
 
 # View for Reviews
@@ -649,7 +577,7 @@ from django.http import JsonResponse
 from .models import Review
 
 def get_all_reviews(request):
-    reviews = list(Review.objects.all().values('user', 'comment', 'liked'))
+    reviews = list(Review.objects.all().values('id''user', 'comment', 'liked'))
     return JsonResponse(reviews, safe=False)
 
 
@@ -782,24 +710,41 @@ def recipe_detail(request, pk):
 
 
 # views.py
+import logging
 
-# views.py
-from django.shortcuts import render, get_object_or_404, redirect
-from .models import Recipe
+logger = logging.getLogger(__name__)
 
-def edit_recipe(request, recipe_id):
-    recipe = get_object_or_404(Recipe, id=recipe_id)
-    if request.method == "POST":
-        recipe.name = request.POST.get('name')
-        recipe.description = request.POST.get('description')
-        recipe.imageurl = request.POST.get('imageurl')
-        recipe.category = request.POST.get('category')
-        recipe.ingredients = request.POST.get('ingredients')
-        recipe.instructions = request.POST.get('instructions')
+@csrf_exempt
+@require_http_methods(["PUT"])
+def edit_recipe(request, id):
+    try:
+        recipe = get_object_or_404(Recipe, id=id)
+
+        if request.content_type == 'application/json':
+            data = json.loads(request.body)
+        else:
+            data = request.POST
+
+        logger.debug(f"Updating recipe ID {id} with data: {data}")
+
+        recipe.name = data.get('name', recipe.name)
+        recipe.description = data.get('description', recipe.description)
+        recipe.category = data.get('category', recipe.category)
+        recipe.ingredients = data.get('ingredients', recipe.ingredients)
+        recipe.instructions = data.get('instructions', recipe.instructions)
+        recipe.imageurl = data.get('imageurl', recipe.imageurl)
+
         recipe.save()
-        return redirect('/')  # Redirect to the root URL after saving the recipe
 
-    return render(request, 'edit_recipe.html', {'recipe': recipe})
+        return JsonResponse({'status': 'success', 'recipe': recipe.to_dict()})
+    except Recipe.DoesNotExist:
+        logger.error(f"Recipe with ID {id} not found.")
+        return JsonResponse({'status': 'error', 'message': 'Recipe not found'}, status=404)
+    except Exception as e:
+        logger.exception(f"Error updating recipe ID {id}: {e}")
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+
 
 
 
@@ -1202,13 +1147,14 @@ def login_view(request):
     if user:
         user.last_login = timezone.now()
         user.save()
-        logger.debug(f"User {user.email} last_login updated to {user.last_login}")
+        auth_login(request, user)
         refresh = RefreshToken.for_user(user)
         return Response({
             'refresh': str(refresh),
             'access': str(refresh.access_token),
         })
     return Response({'error': 'Invalid password.'}, status=400)
+
 
 
 
