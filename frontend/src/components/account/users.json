@@ -1,0 +1,51 @@
+[
+    {
+        "id": 1,
+        "username": "Site Admin",
+        "email": "admin@email.com",
+        "password": "password",
+        "confirmPassword": "password"
+    },
+    {
+        "id": 2,
+        "username": "SandraSmith",
+        "email": "sandrasmith@email.com",
+        "password": "password",
+        "confirmPassword": "password"
+    },
+    {
+        "id": 3,
+        "username": "WalterUnderwood",
+        "email": "walterunderwood@email.com",
+        "password": "password",
+        "confirmPassword": "password"
+    },
+    {
+        "id": 4,
+        "username": "EloiseWilson",
+        "email": "eloisewilson@email.com",
+        "password": "password",
+        "confirmPassword": "password"
+    },
+    {
+        "id": 5,
+        "username": "HannahCarter",
+        "email": "hannahcarter@email.com",
+        "password": "password",
+        "confirmPassword": "password"
+    },
+    {
+        "id": 6,
+        "username": "FeliciaJones",
+        "email": "feliciajones@email.com",
+        "password": "password",
+        "confirmPassword": "password"
+    },
+    {
+        "id": 7,
+        "username": "CaydenQuinn",
+        "email": "caydenquinn@email.com",
+        "password": "password",
+        "confirmPassword": "password"
+    }
+]
